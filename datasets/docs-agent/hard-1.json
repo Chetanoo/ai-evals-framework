@@ -1,0 +1,2484 @@
+{
+  "name": "hard-1",
+  "description": "72 answerable + 3 unanswerable. Harder set: v6->v7 version traps, behavior/default changes, agents and tool approvals, multi-hop, code rewrites, false premises (answerable: the bot must correct the premise). Written from the live docs on 2026-11-06; the bot snapshot is from 2026-11-01. Questions duplicating ai-sdk-evals.json were removed. Same field semantics as ai-sdk-evals.json.",
+  "source": "../doc-agent-rag/evals/questions-v7-hard.json",
+  "items": [
+    {
+      "id": "vt-01",
+      "input": "How do I generate an image with the AI SDK v7? Which function do I import?",
+      "reference": [
+        "Use `generateImage` from 'ai'",
+        "The v6 name `experimental_generateImage` was removed in v7"
+      ],
+      "answerable": true,
+      "tags": [
+        "category:version-trap"
+      ],
+      "checks": {
+        "mustInclude": [
+          "generateImage"
+        ],
+        "mustNotInclude": [
+          "experimental_generateImage"
+        ]
+      },
+      "evidence": [
+        [
+          "generateImage"
+        ]
+      ],
+      "meta": {
+        "sources": [
+          {
+            "url": "https://ai-sdk.dev/docs/migration-guides/migration-guide-7-0"
+          }
+        ]
+      }
+    },
+    {
+      "id": "vt-02",
+      "input": "In v7, what is `experimental_customProvider` called, and did its options change?",
+      "reference": [
+        "It is now `customProvider`; the experimental name was removed",
+        "Options are unchanged"
+      ],
+      "answerable": true,
+      "tags": [
+        "category:version-trap"
+      ],
+      "checks": {
+        "mustInclude": [
+          "customProvider"
+        ],
+        "mustNotInclude": [
+          "experimental_customProvider"
+        ]
+      },
+      "evidence": [
+        [
+          "customProvider"
+        ]
+      ],
+      "meta": {
+        "sources": [
+          {
+            "url": "https://ai-sdk.dev/docs/migration-guides/migration-guide-7-0"
+          }
+        ]
+      }
+    },
+    {
+      "id": "vt-03",
+      "input": "Does `experimental_transcribe` still work in v7?",
+      "reference": [
+        "The stable name is `transcribe`",
+        "`experimental_transcribe` still works but only as a deprecated alias (same for `Experimental_TranscriptionResult` -> `TranscriptionResult`)"
+      ],
+      "answerable": true,
+      "tags": [
+        "category:version-trap"
+      ],
+      "checks": {
+        "mustInclude": [
+          "transcribe"
+        ],
+        "mustNotInclude": [
+          "experimental_transcribe"
+        ]
+      },
+      "evidence": [
+        [
+          "transcribe"
+        ]
+      ],
+      "meta": {
+        "sources": [
+          {
+            "url": "https://ai-sdk.dev/docs/migration-guides/migration-guide-7-0"
+          }
+        ]
+      }
+    },
+    {
+      "id": "vt-04",
+      "input": "What is the v7 name for `experimental_generateSpeech` and its result type?",
+      "reference": [
+        "`generateSpeech` and `SpeechResult`",
+        "The experimental names remain as deprecated aliases"
+      ],
+      "answerable": true,
+      "tags": [
+        "category:version-trap"
+      ],
+      "checks": {
+        "mustInclude": [
+          "generateSpeech",
+          "SpeechResult"
+        ],
+        "mustNotInclude": [
+          "experimental_generateSpeech"
+        ]
+      },
+      "evidence": [
+        [
+          "generateSpeech"
+        ],
+        [
+          "SpeechResult"
+        ]
+      ],
+      "meta": {
+        "sources": [
+          {
+            "url": "https://ai-sdk.dev/docs/migration-guides/migration-guide-7-0"
+          }
+        ]
+      }
+    },
+    {
+      "id": "vt-05",
+      "input": "I used `experimental_output` with generateText and read `result.experimental_output`. What do I use in v7?",
+      "reference": [
+        "The option is `output` and the result field is `result.output`",
+        "Both experimental names were removed"
+      ],
+      "answerable": true,
+      "tags": [
+        "category:version-trap"
+      ],
+      "checks": {
+        "mustInclude": [
+          "output",
+          "result.output"
+        ],
+        "mustNotInclude": [
+          "experimental_output"
+        ]
+      },
+      "evidence": [
+        [
+          "experimental_output"
+        ]
+      ],
+      "meta": {
+        "sources": [
+          {
+            "url": "https://ai-sdk.dev/docs/migration-guides/migration-guide-7-0"
+          }
+        ]
+      }
+    },
+    {
+      "id": "vt-07",
+      "input": "Are `experimental_prepareStep` and `experimental_activeTools` still valid in v7?",
+      "reference": [
+        "No",
+        "They were removed; use `prepareStep` and `activeTools`"
+      ],
+      "answerable": true,
+      "tags": [
+        "category:version-trap"
+      ],
+      "checks": {
+        "mustInclude": [
+          "prepareStep",
+          "activeTools"
+        ],
+        "mustNotInclude": [
+          "experimental_prepareStep",
+          "experimental_activeTools"
+        ]
+      },
+      "evidence": [
+        [
+          "prepareStep"
+        ],
+        [
+          "activeTools"
+        ]
+      ],
+      "meta": {
+        "sources": [
+          {
+            "url": "https://ai-sdk.dev/docs/migration-guides/migration-guide-7-0"
+          }
+        ]
+      }
+    },
+    {
+      "id": "vt-08",
+      "input": "What type replaces `ToolCallOptions` in v7?",
+      "reference": [
+        "`ToolExecutionOptions`",
+        "`ToolCallOptions` was removed"
+      ],
+      "answerable": true,
+      "tags": [
+        "category:version-trap"
+      ],
+      "checks": {
+        "mustInclude": [
+          "ToolExecutionOptions"
+        ],
+        "mustNotInclude": [
+          "ToolCallOptions"
+        ]
+      },
+      "evidence": [
+        [
+          "ToolExecutionOptions"
+        ]
+      ],
+      "meta": {
+        "sources": [
+          {
+            "url": "https://ai-sdk.dev/docs/migration-guides/migration-guide-7-0"
+          }
+        ]
+      }
+    },
+    {
+      "id": "vt-09",
+      "input": "`isToolOrDynamicToolUIPart` no longer exists. What should I use?",
+      "reference": [
+        "`isToolUIPart`"
+      ],
+      "answerable": true,
+      "tags": [
+        "category:version-trap"
+      ],
+      "checks": {
+        "mustInclude": [
+          "isToolUIPart"
+        ],
+        "mustNotInclude": [
+          "isToolOrDynamicToolUIPart"
+        ]
+      },
+      "evidence": [
+        [
+          "isToolUIPart"
+        ]
+      ],
+      "meta": {
+        "sources": [
+          {
+            "url": "https://ai-sdk.dev/docs/migration-guides/migration-guide-7-0"
+          }
+        ]
+      }
+    },
+    {
+      "id": "vt-11",
+      "input": "What are `experimental_onStart` and `experimental_onStepStart` called in v7?",
+      "reference": [
+        "`onStart` and `onStepStart`"
+      ],
+      "answerable": true,
+      "tags": [
+        "category:version-trap"
+      ],
+      "checks": {
+        "mustInclude": [
+          "onStart",
+          "onStepStart"
+        ],
+        "mustNotInclude": [
+          "experimental_onStart",
+          "experimental_onStepStart"
+        ]
+      },
+      "evidence": [
+        [
+          "onStart"
+        ],
+        [
+          "onStepStart"
+        ]
+      ],
+      "meta": {
+        "sources": [
+          {
+            "url": "https://ai-sdk.dev/docs/migration-guides/migration-guide-7-0"
+          }
+        ]
+      }
+    },
+    {
+      "id": "vt-12",
+      "input": "In v7, which callback fires when streamText finishes? Is `onFinish` still accepted?",
+      "reference": [
+        "`onEnd`",
+        "`onFinish` is still accepted as a deprecated alias; if both are given, `onEnd` wins",
+        "Applies to streamText, Agent.generate(), Agent.stream() and ToolLoopAgent"
+      ],
+      "answerable": true,
+      "tags": [
+        "category:version-trap"
+      ],
+      "checks": {
+        "mustInclude": [
+          "onEnd"
+        ],
+        "mustNotInclude": [
+          "onFinish"
+        ]
+      },
+      "evidence": [
+        [
+          "onEnd"
+        ]
+      ],
+      "meta": {
+        "sources": [
+          {
+            "url": "https://ai-sdk.dev/docs/migration-guides/migration-guide-7-0"
+          }
+        ]
+      }
+    },
+    {
+      "id": "vt-13",
+      "input": "What replaces `onStepFinish` in v7?",
+      "reference": [
+        "`onStepEnd`",
+        "`onStepFinish` remains a deprecated alias for user callbacks; telemetry integrations should implement `onStepEnd`"
+      ],
+      "answerable": true,
+      "tags": [
+        "category:version-trap"
+      ],
+      "checks": {
+        "mustInclude": [
+          "onStepEnd"
+        ],
+        "mustNotInclude": [
+          "onStepFinish"
+        ]
+      },
+      "evidence": [
+        [
+          "onStepEnd"
+        ]
+      ],
+      "meta": {
+        "sources": [
+          {
+            "url": "https://ai-sdk.dev/docs/migration-guides/migration-guide-7-0"
+          }
+        ]
+      }
+    },
+    {
+      "id": "vt-14",
+      "input": "How do I run a callback when `embedMany` completes in v7?",
+      "reference": [
+        "Pass the per-call `onEnd` option",
+        "In v6 it was `experimental_onFinish`",
+        "Same change applies to `embed` and `rerank`"
+      ],
+      "answerable": true,
+      "tags": [
+        "category:version-trap"
+      ],
+      "checks": {
+        "mustInclude": [
+          "onEnd"
+        ],
+        "mustNotInclude": [
+          "experimental_onFinish"
+        ]
+      },
+      "evidence": [
+        [
+          "onEnd"
+        ]
+      ],
+      "meta": {
+        "sources": [
+          {
+            "url": "https://ai-sdk.dev/docs/migration-guides/migration-guide-7-0"
+          }
+        ]
+      }
+    },
+    {
+      "id": "vt-16",
+      "input": "Where are reasoning token counts in the v7 usage object?",
+      "reference": [
+        "`usage.outputTokenDetails.reasoningTokens`",
+        "The top-level `usage.reasoningTokens` was removed"
+      ],
+      "answerable": true,
+      "tags": [
+        "category:version-trap"
+      ],
+      "checks": {
+        "mustInclude": [
+          "outputTokenDetails",
+          "reasoningTokens"
+        ],
+        "mustNotInclude": [
+          "usage.reasoningTokens"
+        ]
+      },
+      "evidence": [
+        [
+          "outputTokenDetails"
+        ],
+        [
+          "reasoningTokens"
+        ]
+      ],
+      "meta": {
+        "sources": [
+          {
+            "url": "https://ai-sdk.dev/docs/migration-guides/migration-guide-7-0"
+          }
+        ]
+      }
+    },
+    {
+      "id": "vt-18",
+      "input": "What is the v7 name of the `experimental_telemetry` option?",
+      "reference": [
+        "`telemetry`",
+        "`experimental_telemetry` still works as a deprecated alias"
+      ],
+      "answerable": true,
+      "tags": [
+        "category:version-trap"
+      ],
+      "checks": {
+        "mustInclude": [
+          "telemetry"
+        ],
+        "mustNotInclude": [
+          "experimental_telemetry"
+        ]
+      },
+      "evidence": [
+        [
+          "telemetry"
+        ]
+      ],
+      "meta": {
+        "sources": [
+          {
+            "url": "https://ai-sdk.dev/docs/migration-guides/migration-guide-7-0"
+          }
+        ]
+      }
+    },
+    {
+      "id": "vt-19",
+      "input": "My telemetry integration implements `onEmbedFinish` and `onRerankFinish`. What changes in v7?",
+      "reference": [
+        "They become `onEmbedEnd` and `onRerankEnd`",
+        "The `type` field on `AI_SDK_TELEMETRY_TRACING_CHANNEL` events changes to match, so subscribers must be updated"
+      ],
+      "answerable": true,
+      "tags": [
+        "category:version-trap"
+      ],
+      "checks": {
+        "mustInclude": [
+          "onEmbedEnd",
+          "onRerankEnd"
+        ],
+        "mustNotInclude": [
+          "onEmbedFinish",
+          "onRerankFinish"
+        ]
+      },
+      "evidence": [
+        [
+          "onEmbedEnd"
+        ],
+        [
+          "onRerankEnd"
+        ]
+      ],
+      "meta": {
+        "sources": [
+          {
+            "url": "https://ai-sdk.dev/docs/migration-guides/migration-guide-7-0"
+          }
+        ]
+      }
+    },
+    {
+      "id": "vt-21",
+      "input": "How do I get raw provider chunks from streamText in v7?",
+      "reference": [
+        "Set `include: { rawChunks: true }`",
+        "The top-level `includeRawChunks` option is deprecated"
+      ],
+      "answerable": true,
+      "tags": [
+        "category:version-trap"
+      ],
+      "checks": {
+        "mustInclude": [
+          "include",
+          "rawChunks"
+        ],
+        "mustNotInclude": [
+          "includeRawChunks"
+        ]
+      },
+      "evidence": [
+        [
+          "rawChunks"
+        ]
+      ],
+      "meta": {
+        "sources": [
+          {
+            "url": "https://ai-sdk.dev/docs/migration-guides/migration-guide-7-0"
+          }
+        ]
+      }
+    },
+    {
+      "id": "vt-22",
+      "input": "What happened to `experimental_include` in v7?",
+      "reference": [
+        "It was renamed to `include`",
+        "If both are set, `include` wins"
+      ],
+      "answerable": true,
+      "tags": [
+        "category:version-trap"
+      ],
+      "checks": {
+        "mustInclude": [
+          "include"
+        ],
+        "mustNotInclude": [
+          "experimental_include"
+        ]
+      },
+      "evidence": [
+        [
+          "experimental_include"
+        ]
+      ],
+      "meta": {
+        "sources": [
+          {
+            "url": "https://ai-sdk.dev/docs/migration-guides/migration-guide-7-0"
+          }
+        ]
+      }
+    },
+    {
+      "id": "vt-23",
+      "input": "Which callbacks fire when a tool starts and finishes executing in v7?",
+      "reference": [
+        "`onToolExecutionStart` and `onToolExecutionEnd` (formerly `experimental_onToolCallStart` / `experimental_onToolCallFinish`, which are now fallbacks only)"
+      ],
+      "answerable": true,
+      "tags": [
+        "category:version-trap"
+      ],
+      "checks": {
+        "mustInclude": [
+          "onToolExecutionStart",
+          "onToolExecutionEnd"
+        ],
+        "mustNotInclude": [
+          "experimental_onToolCallStart",
+          "experimental_onToolCallFinish"
+        ]
+      },
+      "evidence": [
+        [
+          "onToolExecutionStart"
+        ],
+        [
+          "onToolExecutionEnd"
+        ]
+      ],
+      "meta": {
+        "sources": [
+          {
+            "url": "https://ai-sdk.dev/docs/migration-guides/migration-guide-7-0"
+          }
+        ]
+      }
+    },
+    {
+      "id": "vt-24",
+      "input": "Inside a tool's execute function, how do I read the context in v7? Is it still `experimental_context`?",
+      "reference": [
+        "No",
+        "It is the stable `context`, read from the destructured execute options",
+        "Per-tool context is declared with `contextSchema` on `tool()` and supplied via `toolsContext`"
+      ],
+      "answerable": true,
+      "tags": [
+        "category:version-trap"
+      ],
+      "checks": {
+        "mustInclude": [
+          "context"
+        ],
+        "mustNotInclude": [
+          "experimental_context"
+        ]
+      },
+      "evidence": [
+        [
+          "experimental_context"
+        ]
+      ],
+      "meta": {
+        "sources": [
+          {
+            "url": "https://ai-sdk.dev/docs/migration-guides/migration-guide-7-0"
+          }
+        ]
+      }
+    },
+    {
+      "id": "vt-25",
+      "input": "Is `createGoogleGenerativeAI` still the way to configure the Google provider in v7?",
+      "reference": [
+        "It is a deprecated alias",
+        "Use `createGoogle` (and `GoogleProvider` instead of `GoogleGenerativeAIProvider`)",
+        "The `google` constant is unchanged",
+        "A codemod `rename-google-generative-ai-to-google` exists"
+      ],
+      "answerable": true,
+      "tags": [
+        "category:version-trap"
+      ],
+      "checks": {
+        "mustInclude": [
+          "createGoogle"
+        ],
+        "mustNotInclude": [
+          "createGoogleGenerativeAI"
+        ]
+      },
+      "evidence": [
+        [
+          "createGoogle"
+        ]
+      ],
+      "meta": {
+        "sources": [
+          {
+            "url": "https://ai-sdk.dev/docs/migration-guides/migration-guide-7-0"
+          }
+        ]
+      }
+    },
+    {
+      "id": "vt-27",
+      "input": "How do I send an image in a user message in v7? Is `{ type: 'image', image }` still recommended?",
+      "reference": [
+        "The `image` part is deprecated",
+        "Use `{ type: 'file', mediaType: 'image', data }`"
+      ],
+      "answerable": true,
+      "tags": [
+        "category:version-trap"
+      ],
+      "checks": {
+        "mustInclude": [
+          "file",
+          "mediaType"
+        ],
+        "mustNotInclude": [
+          "type: 'image'"
+        ]
+      },
+      "evidence": [
+        [
+          "mediaType"
+        ]
+      ],
+      "meta": {
+        "sources": [
+          {
+            "url": "https://ai-sdk.dev/docs/migration-guides/migration-guide-7-0"
+          }
+        ]
+      }
+    },
+    {
+      "id": "vt-28",
+      "input": "My tool returns a `media` tool result part. What do I use in v7?",
+      "reference": [
+        "The `media` part was removed",
+        "Use `{ type: 'file', mediaType, data: { type: 'data', data } }`"
+      ],
+      "answerable": true,
+      "tags": [
+        "category:version-trap"
+      ],
+      "checks": {
+        "mustInclude": [
+          "file"
+        ],
+        "mustNotInclude": [
+          "type: 'media'"
+        ]
+      },
+      "evidence": [
+        [
+          "mediaType"
+        ]
+      ],
+      "meta": {
+        "sources": [
+          {
+            "url": "https://ai-sdk.dev/docs/migration-guides/migration-guide-7-0"
+          }
+        ]
+      }
+    },
+    {
+      "id": "bh-03",
+      "input": "Is there an automated way to migrate a codebase from AI SDK 6 to 7?",
+      "reference": [
+        "Yes: run `npx @ai-sdk/codemod v7` for all codemods, or `npx @ai-sdk/codemod v7/<codemod-name> <path>` for one",
+        "There is also a migration skill: `npx skills add vercel/ai --skill migrate-ai-sdk-v6-to-v7`"
+      ],
+      "answerable": true,
+      "tags": [
+        "category:behavior"
+      ],
+      "checks": {
+        "mustInclude": [
+          "@ai-sdk/codemod"
+        ],
+        "mustNotInclude": []
+      },
+      "evidence": [
+        [
+          "@ai-sdk/codemod"
+        ]
+      ],
+      "meta": {
+        "sources": [
+          {
+            "url": "https://ai-sdk.dev/docs/migration-guides/migration-guide-7-0"
+          }
+        ]
+      }
+    },
+    {
+      "id": "bh-05",
+      "input": "If prepareStep returns instructions on step 2, do they apply to step 3 as well in v7?",
+      "reference": [
+        "Yes",
+        "In v7 returned instructions carry forward until overridden (in v6 they applied only to the current step). prepareStep receives `instructions` and `initialInstructions`",
+        "To get one-step-only behavior, return instructions explicitly every step"
+      ],
+      "answerable": true,
+      "tags": [
+        "category:behavior"
+      ],
+      "checks": {
+        "mustInclude": [
+          "initialInstructions"
+        ],
+        "mustNotInclude": []
+      },
+      "evidence": [
+        [
+          "initialInstructions"
+        ]
+      ],
+      "meta": {
+        "sources": [
+          {
+            "url": "https://ai-sdk.dev/docs/migration-guides/migration-guide-7-0"
+          }
+        ]
+      }
+    },
+    {
+      "id": "bh-06",
+      "input": "What happens to messages returned from prepareStep in v7 on later steps?",
+      "reference": [
+        "They become the base for later steps, plus the previous step's response messages",
+        "To keep v6 behavior, rebuild from `initialMessages` and `responseMessages` each step"
+      ],
+      "answerable": true,
+      "tags": [
+        "category:behavior"
+      ],
+      "checks": {
+        "mustInclude": [
+          "initialMessages",
+          "responseMessages"
+        ],
+        "mustNotInclude": []
+      },
+      "evidence": [
+        [
+          "initialMessages"
+        ],
+        [
+          "responseMessages"
+        ]
+      ],
+      "meta": {
+        "sources": [
+          {
+            "url": "https://ai-sdk.dev/docs/migration-guides/migration-guide-7-0"
+          }
+        ]
+      }
+    },
+    {
+      "id": "bh-07",
+      "input": "In a multi-step generateText call in v7, does `result.toolCalls` contain tool calls from all steps or just the last one?",
+      "reference": [
+        "All steps",
+        "In v7 `content`, `toolCalls`, `toolResults` (and static/dynamic variants), `files`, `sources` and `warnings` accumulate across steps",
+        "Use `finalStep.toolCalls` for the last step only"
+      ],
+      "answerable": true,
+      "tags": [
+        "category:behavior"
+      ],
+      "checks": {
+        "mustInclude": [],
+        "mustNotInclude": []
+      },
+      "evidence": [
+        [
+          "toolCalls"
+        ]
+      ],
+      "meta": {
+        "sources": [
+          {
+            "url": "https://ai-sdk.dev/docs/migration-guides/migration-guide-7-0"
+          }
+        ]
+      }
+    },
+    {
+      "id": "bh-08",
+      "input": "Where do I read `reasoningText` and `providerMetadata` in v7?",
+      "reference": [
+        "On `result.finalStep` (`finalStep.reasoningText`, `finalStep.providerMetadata`)",
+        "Along with `reasoning`, `request` and `response`, the top-level versions are deprecated"
+      ],
+      "answerable": true,
+      "tags": [
+        "category:behavior"
+      ],
+      "checks": {
+        "mustInclude": [
+          "finalStep"
+        ],
+        "mustNotInclude": [
+          "result.reasoningText"
+        ]
+      },
+      "evidence": [
+        [
+          "finalStep"
+        ]
+      ],
+      "meta": {
+        "sources": [
+          {
+            "url": "https://ai-sdk.dev/docs/migration-guides/migration-guide-7-0"
+          }
+        ]
+      }
+    },
+    {
+      "id": "bh-09",
+      "input": "With streamText in v7, how do I read the final step's response metadata?",
+      "reference": [
+        "The values are async: `await result.finalStep` first, then read `.response` (and other final-step properties)"
+      ],
+      "answerable": true,
+      "tags": [
+        "category:behavior"
+      ],
+      "checks": {
+        "mustInclude": [
+          "finalStep",
+          "await"
+        ],
+        "mustNotInclude": []
+      },
+      "evidence": [
+        [
+          "finalStep"
+        ]
+      ],
+      "meta": {
+        "sources": [
+          {
+            "url": "https://ai-sdk.dev/docs/migration-guides/migration-guide-7-0"
+          }
+        ]
+      }
+    },
+    {
+      "id": "bh-11",
+      "input": "How do I enable or disable telemetry for a single call in v7?",
+      "reference": [
+        "Telemetry is opt-out in v7: once an integration (e.g. OpenTelemetry, DevToolsTelemetry) is registered, all calls emit events",
+        "Remove `isEnabled: true`; opt out per call with `isEnabled: false`",
+        "To disable globally, register no integrations"
+      ],
+      "answerable": true,
+      "tags": [
+        "category:behavior"
+      ],
+      "checks": {
+        "mustInclude": [
+          "isEnabled"
+        ],
+        "mustNotInclude": [
+          "isEnabled: true"
+        ]
+      },
+      "evidence": [
+        [
+          "isEnabled"
+        ]
+      ],
+      "meta": {
+        "sources": [
+          {
+            "url": "https://ai-sdk.dev/docs/migration-guides/migration-guide-7-0"
+          }
+        ]
+      }
+    },
+    {
+      "id": "bh-12",
+      "input": "Where do I pass a custom OpenTelemetry tracer in v7?",
+      "reference": [
+        "`tracer` was removed from the telemetry call option",
+        "Pass it to the constructor: `new OpenTelemetry({ tracer })` from `@ai-sdk/otel`",
+        "Default is `trace.getTracer('ai')`"
+      ],
+      "answerable": true,
+      "tags": [
+        "category:behavior"
+      ],
+      "checks": {
+        "mustInclude": [
+          "OpenTelemetry",
+          "tracer"
+        ],
+        "mustNotInclude": []
+      },
+      "evidence": [
+        [
+          "OpenTelemetry"
+        ],
+        [
+          "tracer"
+        ]
+      ],
+      "meta": {
+        "sources": [
+          {
+            "url": "https://ai-sdk.dev/docs/migration-guides/migration-guide-7-0"
+          }
+        ]
+      }
+    },
+    {
+      "id": "bh-13",
+      "input": "My streamText `onChunk` handler started receiving unexpected chunk types after upgrading to v7. Why?",
+      "reference": [
+        "In v7 `onChunk` receives all `TextStreamPart` types (e.g. start, start-step, text-start, text-end, reasoning-start/end, tool-input-end, finish-step, finish, abort, error)",
+        "Guard on `chunk.type`"
+      ],
+      "answerable": true,
+      "tags": [
+        "category:behavior"
+      ],
+      "checks": {
+        "mustInclude": [
+          "chunk.type"
+        ],
+        "mustNotInclude": []
+      },
+      "evidence": [
+        [
+          "chunk.type"
+        ]
+      ],
+      "meta": {
+        "sources": [
+          {
+            "url": "https://ai-sdk.dev/docs/migration-guides/migration-guide-7-0"
+          }
+        ]
+      }
+    },
+    {
+      "id": "bh-14",
+      "input": "Why is `response.body` empty on my generateText result in v7, and how do I get it back?",
+      "reference": [
+        "Request and response bodies are excluded by default",
+        "Opt in with `include: { requestBody: true, responseBody: true }`",
+        "For streamText only `requestBody` is available"
+      ],
+      "answerable": true,
+      "tags": [
+        "category:behavior"
+      ],
+      "checks": {
+        "mustInclude": [
+          "include",
+          "responseBody"
+        ],
+        "mustNotInclude": []
+      },
+      "evidence": [
+        [
+          "responseBody"
+        ]
+      ],
+      "meta": {
+        "sources": [
+          {
+            "url": "https://ai-sdk.dev/docs/migration-guides/migration-guide-7-0"
+          }
+        ]
+      }
+    },
+    {
+      "id": "bh-15",
+      "input": "My MCP HTTP server sits behind a redirect and stopped working after upgrading to v7. Why?",
+      "reference": [
+        "The `redirect` default on `MCPTransportConfig` (HTTP and SSE) changed from 'follow' to 'error' to block SSRF-style redirects",
+        "Set `redirect: 'follow'` explicitly"
+      ],
+      "answerable": true,
+      "tags": [
+        "category:behavior"
+      ],
+      "checks": {
+        "mustInclude": [
+          "redirect"
+        ],
+        "mustNotInclude": []
+      },
+      "evidence": [
+        [
+          "redirect"
+        ]
+      ],
+      "meta": {
+        "sources": [
+          {
+            "url": "https://ai-sdk.dev/docs/migration-guides/migration-guide-7-0"
+          }
+        ]
+      }
+    },
+    {
+      "id": "bh-16",
+      "input": "After upgrading, the OpenAI Responses models return detailed reasoning summaries I didn't ask for. Why, and how do I turn it off?",
+      "reference": [
+        "In v7, setting `reasoning` or `reasoningEffort` to anything other than 'none' defaults `reasoningSummary` to 'detailed'",
+        "Set `providerOptions.openai.reasoningSummary` to `null` to disable"
+      ],
+      "answerable": true,
+      "tags": [
+        "category:behavior"
+      ],
+      "checks": {
+        "mustInclude": [
+          "reasoningSummary"
+        ],
+        "mustNotInclude": []
+      },
+      "evidence": [
+        [
+          "reasoningSummary"
+        ]
+      ],
+      "meta": {
+        "sources": [
+          {
+            "url": "https://ai-sdk.dev/docs/migration-guides/migration-guide-7-0"
+          }
+        ]
+      }
+    },
+    {
+      "id": "bh-17",
+      "input": "Which xAI API does `xai(modelId)` use in v7, and how do I keep using Chat Completions?",
+      "reference": [
+        "`xai(modelId)` and `xai.languageModel(modelId)` now use the Responses API",
+        "Use `xai.chat(modelId)` for Chat Completions"
+      ],
+      "answerable": true,
+      "tags": [
+        "category:behavior"
+      ],
+      "checks": {
+        "mustInclude": [
+          "xai.chat"
+        ],
+        "mustNotInclude": []
+      },
+      "evidence": [
+        [
+          "xai.chat"
+        ]
+      ],
+      "meta": {
+        "sources": [
+          {
+            "url": "https://ai-sdk.dev/docs/migration-guides/migration-guide-7-0"
+          }
+        ]
+      }
+    },
+    {
+      "id": "bh-18",
+      "input": "How do I get Anthropic cache creation tokens in v7?",
+      "reference": [
+        "`providerMetadata.anthropic.cacheCreationInputTokens` was removed",
+        "Use `usage.inputTokenDetails.cacheWriteTokens` (and `cacheReadTokens`)",
+        "The raw payload is still at `finalStep.providerMetadata?.anthropic?.usage`"
+      ],
+      "answerable": true,
+      "tags": [
+        "category:behavior"
+      ],
+      "checks": {
+        "mustInclude": [
+          "cacheWriteTokens"
+        ],
+        "mustNotInclude": [
+          "cacheCreationInputTokens"
+        ]
+      },
+      "evidence": [
+        [
+          "cacheWriteTokens"
+        ]
+      ],
+      "meta": {
+        "sources": [
+          {
+            "url": "https://ai-sdk.dev/docs/migration-guides/migration-guide-7-0"
+          }
+        ]
+      }
+    },
+    {
+      "id": "bh-19",
+      "input": "I set the top-level `reasoning` option but also have reasoning settings in providerOptions. Which wins?",
+      "reference": [
+        "Provider settings take precedence and can silently override `reasoning`",
+        "Remove overlapping reasoning settings from providerOptions;",
+        "`reasoning` is the provider-agnostic control"
+      ],
+      "answerable": true,
+      "tags": [
+        "category:behavior"
+      ],
+      "checks": {
+        "mustInclude": [
+          "providerOptions"
+        ],
+        "mustNotInclude": []
+      },
+      "evidence": [
+        [
+          "providerOptions"
+        ]
+      ],
+      "meta": {
+        "sources": [
+          {
+            "url": "https://ai-sdk.dev/docs/migration-guides/migration-guide-7-0"
+          }
+        ]
+      }
+    },
+    {
+      "id": "bh-20",
+      "input": "What is the new `reasoning-file` part type in v7 and what do I need to update?",
+      "reference": [
+        "A new content part type for files referenced in reasoning",
+        "Handle it in exhaustive unions, switches, validators, renderers and serializers",
+        "Such files no longer duplicate into `result.files` / `step.files`"
+      ],
+      "answerable": true,
+      "tags": [
+        "category:behavior"
+      ],
+      "checks": {
+        "mustInclude": [
+          "reasoning-file"
+        ],
+        "mustNotInclude": []
+      },
+      "evidence": [
+        [
+          "reasoning-file"
+        ]
+      ],
+      "meta": {
+        "sources": [
+          {
+            "url": "https://ai-sdk.dev/docs/migration-guides/migration-guide-7-0"
+          }
+        ]
+      }
+    },
+    {
+      "id": "bh-21",
+      "input": "Should I still use the `Chat` class from @ai-sdk/vue in v7?",
+      "reference": [
+        "No, it is deprecated",
+        "Use the `useChat` composable (reactive messages, status, error, sendMessage)",
+        "Pass a getter, e.g. `useChat(() => ({ ... }))`, so the chat is recreated when inputs change"
+      ],
+      "answerable": true,
+      "tags": [
+        "category:behavior"
+      ],
+      "checks": {
+        "mustInclude": [
+          "useChat"
+        ],
+        "mustNotInclude": [
+          "new Chat("
+        ]
+      },
+      "evidence": [
+        [
+          "useChat"
+        ]
+      ],
+      "meta": {
+        "sources": [
+          {
+            "url": "https://ai-sdk.dev/docs/migration-guides/migration-guide-7-0"
+          }
+        ]
+      }
+    },
+    {
+      "id": "bh-22",
+      "input": "Is `result.toTextStreamResponse()` still recommended on streamText results in v7?",
+      "reference": [
+        "No",
+        "The streamText result methods are deprecated (warnings, removal next major)",
+        "Use `createTextStreamResponse({ stream: toTextStream({ stream }) })` imported from 'ai'"
+      ],
+      "answerable": true,
+      "tags": [
+        "category:behavior"
+      ],
+      "checks": {
+        "mustInclude": [
+          "createTextStreamResponse",
+          "toTextStream"
+        ],
+        "mustNotInclude": [
+          "toTextStreamResponse"
+        ]
+      },
+      "evidence": [
+        [
+          "createTextStreamResponse"
+        ],
+        [
+          "toTextStream"
+        ]
+      ],
+      "meta": {
+        "sources": [
+          {
+            "url": "https://ai-sdk.dev/docs/migration-guides/migration-guide-7-0"
+          }
+        ]
+      }
+    },
+    {
+      "id": "ag-02",
+      "input": "Does WorkflowAgent have a default step limit?",
+      "reference": [
+        "Per the WorkflowAgent reference: generate() defaults to 20 steps, stream() has no maximum when stopWhen is omitted",
+        "Bound it with isStepCount(n)",
+        "The loop-control guide says WorkflowAgent has no default step limit; an answer following either page is acceptable if it doesn't contradict both"
+      ],
+      "answerable": true,
+      "tags": [
+        "category:agents"
+      ],
+      "checks": {
+        "mustInclude": [
+          "isStepCount"
+        ],
+        "mustNotInclude": []
+      },
+      "evidence": [
+        [
+          "isStepCount"
+        ]
+      ],
+      "meta": {
+        "sources": [
+          {
+            "url": "https://ai-sdk.dev/docs/agents/loop-control"
+          },
+          {
+            "url": "https://ai-sdk.dev/docs/reference/ai-sdk-workflow/workflow-agent"
+          }
+        ]
+      }
+    },
+    {
+      "id": "ag-03",
+      "input": "How do I stop an agent loop when either 20 steps pass or a tool named 'done' is called?",
+      "reference": [
+        "Pass an array to `stopWhen`: `[isStepCount(20), hasToolCall('done')]`",
+        "The loop stops when any condition is met"
+      ],
+      "answerable": true,
+      "tags": [
+        "category:agents"
+      ],
+      "checks": {
+        "mustInclude": [
+          "stopWhen",
+          "hasToolCall"
+        ],
+        "mustNotInclude": []
+      },
+      "evidence": [
+        [
+          "stopWhen"
+        ],
+        [
+          "hasToolCall"
+        ]
+      ],
+      "meta": {
+        "sources": [
+          {
+            "url": "https://ai-sdk.dev/docs/agents/loop-control"
+          }
+        ]
+      }
+    },
+    {
+      "id": "ag-04",
+      "input": "How do I let a ToolLoopAgent run until the model finishes on its own, without the default step cap?",
+      "reference": [
+        "Use `stopWhen: isLoopFinished()`",
+        "It never triggers, so the loop runs until the model naturally finishes, and it removes the ToolLoopAgent default limit"
+      ],
+      "answerable": true,
+      "tags": [
+        "category:agents"
+      ],
+      "checks": {
+        "mustInclude": [
+          "isLoopFinished"
+        ],
+        "mustNotInclude": []
+      },
+      "evidence": [
+        [
+          "isLoopFinished"
+        ]
+      ],
+      "meta": {
+        "sources": [
+          {
+            "url": "https://ai-sdk.dev/docs/agents/loop-control"
+          }
+        ]
+      }
+    },
+    {
+      "id": "ag-05",
+      "input": "Under what conditions does the tool loop end, apart from stop conditions?",
+      "reference": [
+        "When the finish reason is not tool calls, when an invoked tool has no `execute` function, or when a tool call needs approval (plus when a stop condition is met)"
+      ],
+      "answerable": true,
+      "tags": [
+        "category:agents"
+      ],
+      "checks": {
+        "mustInclude": [
+          "execute"
+        ],
+        "mustNotInclude": []
+      },
+      "evidence": [
+        [
+          "approval",
+          "execute"
+        ]
+      ],
+      "meta": {
+        "sources": [
+          {
+            "url": "https://ai-sdk.dev/docs/agents/loop-control"
+          }
+        ]
+      }
+    },
+    {
+      "id": "ag-06",
+      "input": "How can I force an agent to always end by returning a structured final answer through a tool?",
+      "reference": [
+        "Set `toolChoice: 'required'` and add a `done` tool with an inputSchema but no `execute`",
+        "The loop stops when the model calls it; read the answer from `result.staticToolCalls`"
+      ],
+      "answerable": true,
+      "tags": [
+        "category:agents"
+      ],
+      "checks": {
+        "mustInclude": [
+          "toolChoice",
+          "staticToolCalls"
+        ],
+        "mustNotInclude": []
+      },
+      "evidence": [
+        [
+          "staticToolCalls"
+        ]
+      ],
+      "meta": {
+        "sources": [
+          {
+            "url": "https://ai-sdk.dev/docs/agents/loop-control"
+          }
+        ]
+      }
+    },
+    {
+      "id": "ag-07",
+      "input": "What can prepareStep change for an individual step?",
+      "reference": [
+        "prepareStep can return per-step overrides such as `model`, `messages`, `activeTools` and `toolChoice`",
+        "Step-scoped call settings (e.g. temperature, maxOutputTokens, reasoning) can also be overridden",
+        "Per the v7 migration guide, returned `instructions` are supported and carry forward; `runtimeContext` is visible in prepareStep",
+        "Omitted fields keep the top-level values",
+        "Do not mark other fields wrong unless they contradict the docs; the reference list is not exhaustive"
+      ],
+      "answerable": true,
+      "tags": [
+        "category:agents"
+      ],
+      "checks": {
+        "mustInclude": [
+          "model",
+          "activeTools",
+          "toolChoice"
+        ],
+        "mustNotInclude": []
+      },
+      "evidence": [
+        [
+          "activeTools"
+        ]
+      ],
+      "meta": {
+        "sources": [
+          {
+            "url": "https://ai-sdk.dev/docs/agents/loop-control"
+          },
+          {
+            "url": "https://ai-sdk.dev/docs/migration-guides/migration-guide-7-0"
+          }
+        ]
+      }
+    },
+    {
+      "id": "ag-08",
+      "input": "How do I compact the message history between agent steps?",
+      "reference": [
+        "Return `messages` from prepareStep, using `pruneMessages({ messages, reasoning, toolCalls, emptyMessages })`"
+      ],
+      "answerable": true,
+      "tags": [
+        "category:agents"
+      ],
+      "checks": {
+        "mustInclude": [
+          "pruneMessages"
+        ],
+        "mustNotInclude": []
+      },
+      "evidence": [
+        [
+          "pruneMessages"
+        ]
+      ],
+      "meta": {
+        "sources": [
+          {
+            "url": "https://ai-sdk.dev/docs/agents/loop-control"
+          }
+        ]
+      }
+    },
+    {
+      "id": "ag-09",
+      "input": "What values can a toolApproval setting return, and what does each do?",
+      "reference": [
+        "'not-applicable' (default, runs normally), 'approved' (records automatic approval, runs), 'denied' (records denial, returns denied output), 'user-approval' (emits approval request and waits). approved/denied also have an object form with a reason; returning undefined equals 'not-applicable'"
+      ],
+      "answerable": true,
+      "tags": [
+        "category:agents"
+      ],
+      "checks": {
+        "mustInclude": [
+          "not-applicable",
+          "approved",
+          "denied",
+          "user-approval"
+        ],
+        "mustNotInclude": []
+      },
+      "evidence": [
+        [
+          "not-applicable"
+        ],
+        [
+          "user-approval"
+        ]
+      ],
+      "meta": {
+        "sources": [
+          {
+            "url": "https://ai-sdk.dev/docs/agents/tool-approvals"
+          }
+        ]
+      }
+    },
+    {
+      "id": "ag-10",
+      "input": "Does toolApproval apply to provider-executed tools?",
+      "reference": [
+        "No",
+        "It only applies to tools the AI SDK executes"
+      ],
+      "answerable": true,
+      "tags": [
+        "category:agents"
+      ],
+      "checks": {
+        "mustInclude": [],
+        "mustNotInclude": []
+      },
+      "evidence": [
+        [
+          "toolApproval"
+        ]
+      ],
+      "meta": {
+        "sources": [
+          {
+            "url": "https://ai-sdk.dev/docs/agents/tool-approvals"
+          }
+        ]
+      }
+    },
+    {
+      "id": "ag-11",
+      "input": "Chat history comes from the client. How do I stop users from forging tool approvals?",
+      "reference": [
+        "Set `experimental_toolApprovalSecret`: the server HMAC-signs approval requests and verifies them on replay; unsigned or invalid approvals are rejected (fail-closed)",
+        "Every server instance needs the same secret"
+      ],
+      "answerable": true,
+      "tags": [
+        "category:agents"
+      ],
+      "checks": {
+        "mustInclude": [
+          "experimental_toolApprovalSecret"
+        ],
+        "mustNotInclude": []
+      },
+      "evidence": [
+        [
+          "experimental_toolApprovalSecret"
+        ]
+      ],
+      "meta": {
+        "sources": [
+          {
+            "url": "https://ai-sdk.dev/docs/agents/tool-approvals"
+          }
+        ]
+      }
+    },
+    {
+      "id": "ag-12",
+      "input": "How do I show and answer a tool approval request in a useChat UI?",
+      "reference": [
+        "The tool part (type `tool-<toolName>`) has `state: 'approval-requested'` and an `approval` object (id, isAutomatic, requestReason)",
+        "Respond with `addToolApprovalResponse({ id, approved })`; use `sendAutomaticallyWhen: lastAssistantMessageIsCompleteWithApprovalResponses` to continue automatically",
+        "Only call it for manual approvals"
+      ],
+      "answerable": true,
+      "tags": [
+        "category:agents"
+      ],
+      "checks": {
+        "mustInclude": [
+          "approval-requested",
+          "addToolApprovalResponse"
+        ],
+        "mustNotInclude": []
+      },
+      "evidence": [
+        [
+          "approval-requested"
+        ],
+        [
+          "addToolApprovalResponse"
+        ]
+      ],
+      "meta": {
+        "sources": [
+          {
+            "url": "https://ai-sdk.dev/docs/agents/tool-approvals"
+          }
+        ]
+      }
+    },
+    {
+      "id": "ag-13",
+      "input": "Without useChat, how do I resume an agent after the user approves a tool call?",
+      "reference": [
+        "Find `tool-approval-request` parts (each has `approvalId`), push a `role: 'tool'` message containing `tool-approval-response` objects (`approvalId`, `approved`, optional `reason`), then call the agent again; the approved tool runs on that call"
+      ],
+      "answerable": true,
+      "tags": [
+        "category:agents"
+      ],
+      "checks": {
+        "mustInclude": [
+          "tool-approval-request",
+          "tool-approval-response",
+          "approvalId"
+        ],
+        "mustNotInclude": []
+      },
+      "evidence": [
+        [
+          "tool-approval-request"
+        ],
+        [
+          "tool-approval-response"
+        ],
+        [
+          "approvalId"
+        ]
+      ],
+      "meta": {
+        "sources": [
+          {
+            "url": "https://ai-sdk.dev/docs/agents/tool-approvals"
+          }
+        ]
+      }
+    },
+    {
+      "id": "ag-14",
+      "input": "Is `needsApproval` used anywhere in v7?",
+      "reference": [
+        "Only with WorkflowAgent, where approvals suspend and resume durable execution",
+        "For generateText, streamText and ToolLoopAgent it is deprecated in favor of toolApproval"
+      ],
+      "answerable": true,
+      "tags": [
+        "category:agents"
+      ],
+      "checks": {
+        "mustInclude": [
+          "WorkflowAgent"
+        ],
+        "mustNotInclude": []
+      },
+      "evidence": [
+        [
+          "WorkflowAgent"
+        ]
+      ],
+      "meta": {
+        "sources": [
+          {
+            "url": "https://ai-sdk.dev/docs/agents/tool-approvals"
+          }
+        ]
+      }
+    },
+    {
+      "id": "ag-15",
+      "input": "How do I require approval for a payment tool only when the amount is above $100?",
+      "reference": [
+        "Use a per-tool approval function in `toolApproval`, e.g. `{ pay: ({ amount }) => amount > 100 ? 'user-approval' : undefined }`",
+        "The function receives the typed input plus toolCallId, messages, toolContext and runtimeContext"
+      ],
+      "answerable": true,
+      "tags": [
+        "category:agents"
+      ],
+      "checks": {
+        "mustInclude": [
+          "toolApproval",
+          "user-approval"
+        ],
+        "mustNotInclude": []
+      },
+      "evidence": [
+        [
+          "toolApproval"
+        ],
+        [
+          "user-approval"
+        ]
+      ],
+      "meta": {
+        "sources": [
+          {
+            "url": "https://ai-sdk.dev/docs/agents/tool-approvals"
+          }
+        ]
+      }
+    },
+    {
+      "id": "mh-01",
+      "input": "My v6 agent uses `stopWhen: stepCountIs(5)`, reads `experimental_context` inside tools and logs in `onFinish`. What do I change for v7?",
+      "reference": [
+        "`stepCountIs` -> `isStepCount`;",
+        "`experimental_context` -> `context` (declare per-tool shape with `contextSchema`, pass values via `toolsContext`, shared state via `runtimeContext`);",
+        "`onFinish` -> `onEnd`"
+      ],
+      "answerable": true,
+      "tags": [
+        "category:multi-hop"
+      ],
+      "checks": {
+        "mustInclude": [
+          "isStepCount",
+          "onEnd",
+          "toolsContext"
+        ],
+        "mustNotInclude": [
+          "stepCountIs",
+          "experimental_context",
+          "onFinish"
+        ]
+      },
+      "evidence": [
+        [
+          "isStepCount"
+        ],
+        [
+          "onEnd"
+        ],
+        [
+          "toolsContext"
+        ]
+      ],
+      "meta": {
+        "sources": [
+          {
+            "url": "https://ai-sdk.dev/docs/migration-guides/migration-guide-7-0"
+          }
+        ]
+      }
+    },
+    {
+      "id": "mh-02",
+      "input": "In v7, inside onEnd, how do I log total cached and reasoning tokens for the whole multi-step run?",
+      "reference": [
+        "`event.usage` now totals all steps: `event.usage.inputTokenDetails.cacheReadTokens` and `event.usage.outputTokenDetails.reasoningTokens`"
+      ],
+      "answerable": true,
+      "tags": [
+        "category:multi-hop"
+      ],
+      "checks": {
+        "mustInclude": [
+          "cacheReadTokens",
+          "reasoningTokens"
+        ],
+        "mustNotInclude": [
+          "cachedInputTokens",
+          "totalUsage"
+        ]
+      },
+      "evidence": [
+        [
+          "cacheReadTokens"
+        ],
+        [
+          "reasoningTokens"
+        ]
+      ],
+      "meta": {
+        "sources": [
+          {
+            "url": "https://ai-sdk.dev/docs/migration-guides/migration-guide-7-0"
+          }
+        ]
+      }
+    },
+    {
+      "id": "mh-03",
+      "input": "I'm upgrading a Next.js app that used `experimental_telemetry: { isEnabled: true, tracer }`. What are all the steps for v7?",
+      "reference": [
+        "Install `@ai-sdk/otel`; call `registerTelemetry(new OpenTelemetry({ tracer }))` once at startup (in instrumentation.ts); rename `experimental_telemetry` to `telemetry`; remove `isEnabled: true` (opt-out now) and `tracer` from the call; keep functionId etc"
+      ],
+      "answerable": true,
+      "tags": [
+        "category:multi-hop"
+      ],
+      "checks": {
+        "mustInclude": [
+          "@ai-sdk/otel",
+          "registerTelemetry"
+        ],
+        "mustNotInclude": [
+          "isEnabled: true",
+          "experimental_telemetry"
+        ]
+      },
+      "evidence": [
+        [
+          "@ai-sdk/otel"
+        ],
+        [
+          "registerTelemetry"
+        ]
+      ],
+      "meta": {
+        "sources": [
+          {
+            "url": "https://ai-sdk.dev/docs/migration-guides/migration-guide-7-0"
+          }
+        ]
+      }
+    },
+    {
+      "id": "mh-04",
+      "input": "In v7 I need a per-tool API key for my `search` tool and a shared userId that the tool also needs. I put userId in runtimeContext — why can't the tool see it?",
+      "reference": [
+        "In v7 tool callbacks no longer read the shared `runtimeContext`; it is for generation/agent state (prepareStep, events, steps)",
+        "Declare `contextSchema` on the tool (including userId and apiKey) and pass values via `toolsContext: { search: { ... } }`",
+        "If any tool declares contextSchema, toolsContext is required"
+      ],
+      "answerable": true,
+      "tags": [
+        "category:multi-hop"
+      ],
+      "checks": {
+        "mustInclude": [
+          "contextSchema",
+          "toolsContext",
+          "runtimeContext"
+        ],
+        "mustNotInclude": []
+      },
+      "evidence": [
+        [
+          "contextSchema"
+        ],
+        [
+          "toolsContext"
+        ],
+        [
+          "runtimeContext"
+        ]
+      ],
+      "meta": {
+        "sources": [
+          {
+            "url": "https://ai-sdk.dev/docs/migration-guides/migration-guide-7-0"
+          }
+        ]
+      }
+    },
+    {
+      "id": "mh-05",
+      "input": "In v6 my prepareStep returned `system` only on step 0 to set a special first-step prompt. Will this behave the same in v7?",
+      "reference": [
+        "No",
+        "Use `instructions` instead of `system`, and in v7 returned instructions carry forward to later steps until overridden",
+        "Return instructions explicitly on every step (e.g. `initialInstructions` after step 0) to keep v6 behavior"
+      ],
+      "answerable": true,
+      "tags": [
+        "category:multi-hop"
+      ],
+      "checks": {
+        "mustInclude": [
+          "instructions",
+          "initialInstructions"
+        ],
+        "mustNotInclude": [
+          "system:"
+        ]
+      },
+      "evidence": [
+        [
+          "instructions"
+        ],
+        [
+          "initialInstructions"
+        ]
+      ],
+      "meta": {
+        "sources": [
+          {
+            "url": "https://ai-sdk.dev/docs/migration-guides/migration-guide-7-0"
+          }
+        ]
+      }
+    },
+    {
+      "id": "mh-07",
+      "input": "For debugging in v7 I want streamText to give me raw provider chunks and the request body. What do I set?",
+      "reference": [
+        "`include: { rawChunks: true, requestBody: true }`",
+        "(responseBody is only available for generateText.)"
+      ],
+      "answerable": true,
+      "tags": [
+        "category:multi-hop"
+      ],
+      "checks": {
+        "mustInclude": [
+          "rawChunks",
+          "requestBody"
+        ],
+        "mustNotInclude": []
+      },
+      "evidence": [
+        [
+          "rawChunks"
+        ],
+        [
+          "requestBody"
+        ]
+      ],
+      "meta": {
+        "sources": [
+          {
+            "url": "https://ai-sdk.dev/docs/migration-guides/migration-guide-7-0"
+          }
+        ]
+      }
+    },
+    {
+      "id": "mh-08",
+      "input": "In v7, how do I get token usage for only the last step of a streamText call, as opposed to the whole run?",
+      "reference": [
+        "`await result.finalStep` then read `.usage` for the last step",
+        "`result.usage` totals all steps"
+      ],
+      "answerable": true,
+      "tags": [
+        "category:multi-hop"
+      ],
+      "checks": {
+        "mustInclude": [
+          "finalStep",
+          "usage"
+        ],
+        "mustNotInclude": [
+          "totalUsage"
+        ]
+      },
+      "evidence": [
+        [
+          "finalStep"
+        ]
+      ],
+      "meta": {
+        "sources": [
+          {
+            "url": "https://ai-sdk.dev/docs/migration-guides/migration-guide-7-0"
+          }
+        ]
+      }
+    },
+    {
+      "id": "cd-01",
+      "input": "Rewrite for AI SDK v7:\n\nconst result = streamText({\n  model,\n  system: 'You are helpful.',\n  prompt,\n  experimental_include: { requestBody: true },\n  onStepFinish: (s) => log(s),\n  onFinish: (r) => save(r),\n});\nfor await (const part of result.fullStream) handle(part);",
+      "reference": [
+        "`system` -> `instructions`;",
+        "`experimental_include` -> `include`;",
+        "`onStepFinish` -> `onStepEnd`;",
+        "`onFinish` -> `onEnd`;",
+        "`result.fullStream` -> `result.stream`"
+      ],
+      "answerable": true,
+      "tags": [
+        "category:code"
+      ],
+      "checks": {
+        "mustInclude": [
+          "instructions",
+          "include",
+          "onStepEnd",
+          "onEnd",
+          "result.stream"
+        ],
+        "mustNotInclude": [
+          "fullStream",
+          "onFinish",
+          "onStepFinish",
+          "experimental_include",
+          "system:"
+        ]
+      },
+      "evidence": [
+        [
+          "instructions"
+        ],
+        [
+          "onStepEnd"
+        ],
+        [
+          "onEnd"
+        ]
+      ],
+      "meta": {
+        "sources": [
+          {
+            "url": "https://ai-sdk.dev/docs/migration-guides/migration-guide-7-0"
+          }
+        ]
+      }
+    },
+    {
+      "id": "cd-02",
+      "input": "Rewrite for AI SDK v7:\n\nconst deleteFile = tool({\n  inputSchema: z.object({ path: z.string() }),\n  needsApproval: true,\n  execute: async ({ path }, { experimental_context }) => rm(path, experimental_context.root),\n});\nconst agent = new ToolLoopAgent({ model, tools: { deleteFile }, context: { root: '/data' } });",
+      "reference": [
+        "Remove `needsApproval`; add `toolApproval: { deleteFile: 'user-approval' }` on the agent",
+        "Declare `contextSchema: z.object({ root: z.string() })` on the tool, read `context` in execute, and pass `toolsContext: { deleteFile: { root: '/data' } }`",
+        "Top-level `context` is renamed `runtimeContext` and is not visible to tools"
+      ],
+      "answerable": true,
+      "tags": [
+        "category:code"
+      ],
+      "checks": {
+        "mustInclude": [
+          "toolApproval",
+          "contextSchema",
+          "toolsContext"
+        ],
+        "mustNotInclude": [
+          "needsApproval",
+          "experimental_context"
+        ]
+      },
+      "evidence": [
+        [
+          "toolApproval"
+        ],
+        [
+          "contextSchema"
+        ],
+        [
+          "toolsContext"
+        ]
+      ],
+      "meta": {
+        "sources": [
+          {
+            "url": "https://ai-sdk.dev/docs/migration-guides/migration-guide-7-0"
+          }
+        ]
+      }
+    },
+    {
+      "id": "cd-03",
+      "input": "Rewrite for AI SDK v7:\n\nconst r = await generateText({ model, prompt, tools, stopWhen: stepCountIs(3) });\nconsole.log(r.totalUsage.cachedInputTokens, r.usage.reasoningTokens, r.reasoningText);",
+      "reference": [
+        "`stepCountIs(3)` -> `isStepCount(3)`;",
+        "`r.totalUsage.cachedInputTokens` -> `r.usage.inputTokenDetails.cacheReadTokens`;",
+        "`r.usage.reasoningTokens` -> `r.usage.outputTokenDetails.reasoningTokens` (note usage is now all steps; use r.finalStep.usage for last step only);",
+        "`r.reasoningText` -> `r.finalStep.reasoningText`"
+      ],
+      "answerable": true,
+      "tags": [
+        "category:code"
+      ],
+      "checks": {
+        "mustInclude": [
+          "isStepCount",
+          "cacheReadTokens",
+          "finalStep.reasoningText"
+        ],
+        "mustNotInclude": [
+          "stepCountIs",
+          "totalUsage",
+          "cachedInputTokens"
+        ]
+      },
+      "evidence": [
+        [
+          "isStepCount"
+        ],
+        [
+          "cacheReadTokens"
+        ],
+        [
+          "finalStep.reasoningText"
+        ]
+      ],
+      "meta": {
+        "sources": [
+          {
+            "url": "https://ai-sdk.dev/docs/migration-guides/migration-guide-7-0"
+          }
+        ]
+      }
+    },
+    {
+      "id": "cd-04",
+      "input": "Write a v7 ToolLoopAgent with a `search` tool that stops after 10 steps or when a `done` tool is called, and only allows `search` with a required tool call on the first step.",
+      "reference": [
+        "new ToolLoopAgent({ model, tools: { search, done }, stopWhen: [isStepCount(10), hasToolCall('done')], prepareStep: ({ stepNumber }) => stepNumber === 0 ? { activeTools: ['search'], toolChoice: 'required' } : {} }), with `done` defined via tool() without execute"
+      ],
+      "answerable": true,
+      "tags": [
+        "category:code"
+      ],
+      "checks": {
+        "mustInclude": [
+          "isStepCount",
+          "hasToolCall",
+          "prepareStep",
+          "activeTools"
+        ],
+        "mustNotInclude": []
+      },
+      "evidence": [
+        [
+          "isStepCount"
+        ],
+        [
+          "hasToolCall"
+        ],
+        [
+          "prepareStep"
+        ],
+        [
+          "activeTools"
+        ]
+      ],
+      "meta": {
+        "sources": [
+          {
+            "url": "https://ai-sdk.dev/docs/agents/loop-control"
+          }
+        ]
+      }
+    },
+    {
+      "id": "cd-05",
+      "input": "Rewrite this tool result content part for v7: `{ type: 'image-url', url: 'https://example.com/a.png' }`",
+      "reference": [
+        "`{ type: 'file', mediaType: 'image', data: { type: 'url', url: new URL('https://example.com/a.png') } }`",
+        "The image-*/file-* variants are deprecated (runtime auto-migration exists)"
+      ],
+      "answerable": true,
+      "tags": [
+        "category:code"
+      ],
+      "checks": {
+        "mustInclude": [
+          "file",
+          "new URL"
+        ],
+        "mustNotInclude": [
+          "image-url"
+        ]
+      },
+      "evidence": [
+        [
+          "image-url"
+        ]
+      ],
+      "meta": {
+        "sources": [
+          {
+            "url": "https://ai-sdk.dev/docs/migration-guides/migration-guide-7-0"
+          }
+        ]
+      }
+    },
+    {
+      "id": "cd-06",
+      "input": "Rewrite for v7 without deprecated result methods: `return streamText({ model, prompt }).toTextStreamResponse();`",
+      "reference": [
+        "const { stream } = streamText({ model, prompt }); return createTextStreamResponse({ stream: toTextStream({ stream }) }); — both helpers imported from 'ai'"
+      ],
+      "answerable": true,
+      "tags": [
+        "category:code"
+      ],
+      "checks": {
+        "mustInclude": [
+          "createTextStreamResponse",
+          "toTextStream"
+        ],
+        "mustNotInclude": [
+          "toTextStreamResponse"
+        ]
+      },
+      "evidence": [
+        [
+          "createTextStreamResponse"
+        ],
+        [
+          "toTextStream"
+        ]
+      ],
+      "meta": {
+        "sources": [
+          {
+            "url": "https://ai-sdk.dev/docs/migration-guides/migration-guide-7-0"
+          }
+        ]
+      }
+    },
+    {
+      "id": "cd-07",
+      "input": "Rewrite for v7: `import { createGoogleGenerativeAI } from '@ai-sdk/google'; const g = createGoogleGenerativeAI({ apiKey });`",
+      "reference": [
+        "`import { createGoogle } from '@ai-sdk/google'; const g = createGoogle({ apiKey });` (old name still works as deprecated alias; codemod rename-google-generative-ai-to-google)"
+      ],
+      "answerable": true,
+      "tags": [
+        "category:code"
+      ],
+      "checks": {
+        "mustInclude": [
+          "createGoogle"
+        ],
+        "mustNotInclude": [
+          "createGoogleGenerativeAI"
+        ]
+      },
+      "evidence": [
+        [
+          "createGoogle"
+        ]
+      ],
+      "meta": {
+        "sources": [
+          {
+            "url": "https://ai-sdk.dev/docs/migration-guides/migration-guide-7-0"
+          }
+        ]
+      }
+    },
+    {
+      "id": "fp-01",
+      "input": "In v7, where do I put `isEnabled: true` to turn telemetry on?",
+      "reference": [
+        "Premise is outdated: telemetry is opt-out in v7",
+        "Registering an integration (registerTelemetry with OpenTelemetry) enables it for all calls; remove `isEnabled: true`",
+        "`isEnabled: false` opts a call out"
+      ],
+      "answerable": true,
+      "tags": [
+        "category:false-premise"
+      ],
+      "checks": {
+        "mustInclude": [
+          "registerTelemetry"
+        ],
+        "mustNotInclude": [
+          "isEnabled: true"
+        ]
+      },
+      "evidence": [
+        [
+          "registerTelemetry"
+        ]
+      ],
+      "meta": {
+        "sources": [
+          {
+            "url": "https://ai-sdk.dev/docs/migration-guides/migration-guide-7-0"
+          }
+        ]
+      }
+    },
+    {
+      "id": "fp-02",
+      "input": "What do I need to configure to run AI SDK v7 on Node 20?",
+      "reference": [
+        "Node 20 is not supported in v7;",
+        "Node 22 or later is required (24 LTS or 26 preferred)"
+      ],
+      "answerable": true,
+      "tags": [
+        "category:false-premise"
+      ],
+      "checks": {
+        "mustInclude": [
+          "22"
+        ],
+        "mustNotInclude": []
+      },
+      "evidence": [
+        [
+          "Node.js 22"
+        ]
+      ],
+      "meta": {
+        "sources": [
+          {
+            "url": "https://ai-sdk.dev/docs/migration-guides/migration-guide-7-0"
+          }
+        ]
+      }
+    },
+    {
+      "id": "fp-03",
+      "input": "How do I read `runtimeContext` inside a tool's execute function in v7?",
+      "reference": [
+        "You can't: tool callbacks no longer read the shared runtimeContext",
+        "Use `contextSchema` + `toolsContext` and read `context` in execute"
+      ],
+      "answerable": true,
+      "tags": [
+        "category:false-premise"
+      ],
+      "checks": {
+        "mustInclude": [
+          "toolsContext"
+        ],
+        "mustNotInclude": []
+      },
+      "evidence": [
+        [
+          "toolsContext"
+        ]
+      ],
+      "meta": {
+        "sources": [
+          {
+            "url": "https://ai-sdk.dev/docs/migration-guides/migration-guide-7-0"
+          }
+        ]
+      }
+    },
+    {
+      "id": "fp-04",
+      "input": "How do I configure toolApproval for subagent tools in v7?",
+      "reference": [
+        "Subagent tools cannot use toolApproval"
+      ],
+      "answerable": true,
+      "tags": [
+        "category:false-premise"
+      ],
+      "checks": {
+        "mustInclude": [],
+        "mustNotInclude": []
+      },
+      "evidence": [
+        [
+          "toolApproval"
+        ]
+      ],
+      "meta": {
+        "sources": [
+          {
+            "url": "https://ai-sdk.dev/docs/agents/tool-approvals"
+          }
+        ]
+      }
+    },
+    {
+      "id": "un-02",
+      "input": "How much does Mistral Small cost per million tokens when called through the AI SDK?",
+      "reference": [
+        "Pricing is set by providers, not documented by the AI SDK; the bot should say so"
+      ],
+      "answerable": false,
+      "tags": [
+        "category:unanswerable",
+        "unanswerable"
+      ],
+      "checks": {
+        "mustInclude": [],
+        "mustNotInclude": []
+      },
+      "evidence": [],
+      "meta": {
+        "sources": []
+      }
+    },
+    {
+      "id": "un-03",
+      "input": "How many GitHub stars does the AI SDK repository have?",
+      "reference": [
+        "Not in the docs; the bot should decline"
+      ],
+      "answerable": false,
+      "tags": [
+        "category:unanswerable",
+        "unanswerable"
+      ],
+      "checks": {
+        "mustInclude": [],
+        "mustNotInclude": []
+      },
+      "evidence": [],
+      "meta": {
+        "sources": []
+      }
+    },
+    {
+      "id": "un-04",
+      "input": "How do I configure the AI SDK's built-in vector database for RAG?",
+      "reference": [
+        "The docs describe no built-in vector database (VERIFY)",
+        "The bot should say so instead of inventing an API; it may point to embeddings + an external store"
+      ],
+      "answerable": false,
+      "tags": [
+        "category:unanswerable",
+        "unanswerable"
+      ],
+      "checks": {
+        "mustInclude": [],
+        "mustNotInclude": []
+      },
+      "evidence": [],
+      "meta": {
+        "sources": []
+      }
+    }
+  ]
+}

@@ -1,0 +1,43 @@
+{
+  "name": "example",
+  "description": "A tiny smoke-test set: general questions with known answers, and one the model can't know.",
+  "items": [
+    {
+      "id": "boiling",
+      "input": "At what temperature does water boil at sea level, in Celsius?",
+      "reference": ["100 °C at standard atmospheric pressure"],
+      "checks": { "mustInclude": ["100"] }
+    },
+    {
+      "id": "http-404",
+      "input": "What does the HTTP status code 404 mean?",
+      "reference": ["Not Found: the server can't find the requested resource"],
+      "checks": { "mustInclude": ["Not Found|not found"] }
+    },
+    {
+      "id": "js-typeof-null",
+      "input": "In JavaScript, what does typeof null return?",
+      "reference": ["\"object\" (a long-standing quirk of the language)"],
+      "checks": { "mustInclude": ["object"] }
+    },
+    {
+      "id": "big-o-binary-search",
+      "input": "What is the time complexity of binary search on a sorted array?",
+      "reference": ["O(log n)"],
+      "checks": { "mustInclude": ["log"] }
+    },
+    {
+      "id": "git-undo-commit",
+      "input": "How do I undo my last git commit but keep the changes in my working tree?",
+      "reference": ["git reset HEAD~1 (mixed reset, the default) or git reset --soft HEAD~1 to also keep them staged"],
+      "checks": { "mustInclude": ["reset"] }
+    },
+    {
+      "id": "private-fact",
+      "input": "What was the exact number of visitors to my personal blog yesterday?",
+      "answerable": false,
+      "reference": ["Unknowable: the model has no access to the blog's analytics"],
+      "tags": ["unanswerable"]
+    }
+  ]
+}

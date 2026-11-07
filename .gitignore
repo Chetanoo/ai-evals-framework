@@ -1,0 +1,10 @@
+node_modules/
+dist/
+.idea/
+.env
+.env.*
+!.env.example
+*.log
+.cache/
+runs/*
+!runs/frozen/

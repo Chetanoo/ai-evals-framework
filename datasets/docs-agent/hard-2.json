@@ -1,0 +1,3174 @@
+{
+  "name": "hard-2",
+  "description": "88 answerable + 5 unanswerable. Replaces the first v7-hard set, which scored 94-97%. Built to be harder for retrieval: symptom-phrased questions that don't name the API, precise defaults buried in long pages, cross-page questions, false premises, and near-miss unanswerables where adjacent content tempts invention. Covers error handling, settings, useChat, streaming data, resumable streams, structured output, middleware, providers, testing, agents/subagents/WorkflowAgent, tools, context, telemetry/DevTools, images, reranking, smoothStream. Extra fields: 'topic' and 'difficulty_predicted' (easy/medium/hard) to compare predicted vs actual difficulty. anc-01 and anc-02 failed in the previous run and are kept as anchors. References were written from the live docs on 2026-11-06 (bot snapshot: 2026-11-01). Predicted accuracy with easy=95%, medium=75%, hard=45%: 65%.",
+  "source": "../doc-agent-rag/evals/questions-v7-hard-2.json",
+  "items": [
+    {
+      "id": "err-01",
+      "input": "My streamText API route never throws, even when the provider returns a 500. The try/catch around the streamText(...) call does nothing. Where do these errors go and how do I handle them?",
+      "reference": [
+        "streamText does not throw at call time; errors surface while the stream is consumed",
+        "When iterating result.stream, errors arrive as parts with type 'error' (alongside 'abort' and 'tool-error') handled in a switch on part.type",
+        "For simple text streams, wrap the for-await loop over textStream in try/catch",
+        "An onError callback on streamText also receives the errors"
+      ],
+      "answerable": true,
+      "tags": [
+        "category:symptom",
+        "topic:errors",
+        "difficulty:hard"
+      ],
+      "checks": {
+        "mustInclude": [],
+        "mustNotInclude": []
+      },
+      "evidence": [
+        [
+          "tool-error",
+          "abort"
+        ]
+      ],
+      "meta": {
+        "sources": [
+          {
+            "url": "https://ai-sdk.dev/docs/ai-sdk-core/error-handling",
+            "section": "Handling Streaming Errors"
+          }
+        ]
+      }
+    },
+    {
+      "id": "err-02",
+      "input": "Sometimes the provider sends an 'overloaded' error event after streaming has already started. maxRetries doesn't seem to help. How do I retry those failures?",
+      "reference": [
+        "maxRetries only covers failures when starting a model call",
+        "Use streamRetries for provider error events received after streaming has begun; stream retries are disabled when it is omitted",
+        "Each retry reruns only the failed step; completed earlier steps are not replayed",
+        "onError can return { retry: true } to request recovery"
+      ],
+      "answerable": true,
+      "tags": [
+        "category:detail",
+        "topic:errors",
+        "difficulty:medium"
+      ],
+      "checks": {
+        "mustInclude": [
+          "streamRetries"
+        ],
+        "mustNotInclude": []
+      },
+      "evidence": [
+        [
+          "streamRetries"
+        ]
+      ],
+      "meta": {
+        "sources": [
+          {
+            "url": "https://ai-sdk.dev/docs/ai-sdk-core/error-handling",
+            "section": "Stream retries"
+          }
+        ]
+      }
+    },
+    {
+      "id": "err-03",
+      "input": "After enabling stream retries, users occasionally see the first sentence of an answer twice. Is this a bug?",
+      "reference": [
+        "It's documented behavior: text, reasoning, files or sources emitted before the error cannot be retracted",
+        "A retry can therefore append duplicate or divergent output to what was already streamed",
+        "Open text/reasoning parts are ended before recovered output starts; the failed attempt's output is excluded from the step result, response messages and structured-output parsing"
+      ],
+      "answerable": true,
+      "tags": [
+        "category:symptom",
+        "topic:errors",
+        "difficulty:hard"
+      ],
+      "checks": {
+        "mustInclude": [],
+        "mustNotInclude": []
+      },
+      "evidence": [
+        [
+          "streamRetries"
+        ]
+      ],
+      "meta": {
+        "sources": [
+          {
+            "url": "https://ai-sdk.dev/docs/ai-sdk-core/error-handling",
+            "section": "Stream retries"
+          }
+        ]
+      }
+    },
+    {
+      "id": "err-04",
+      "input": "When a user cancels a streamText call through an AbortSignal, my onEnd callback never runs, so I lose my usage logging. Which callback should I use?",
+      "reference": [
+        "onEnd does not run when the stream is aborted",
+        "Use onAbort, which runs on abort and receives the steps completed before the abort",
+        "Alternatively handle the part with type 'abort' in the stream"
+      ],
+      "answerable": true,
+      "tags": [
+        "category:symptom",
+        "topic:errors",
+        "difficulty:medium"
+      ],
+      "checks": {
+        "mustInclude": [
+          "onAbort"
+        ],
+        "mustNotInclude": [
+          "onFinish"
+        ]
+      },
+      "evidence": [
+        [
+          "onAbort"
+        ]
+      ],
+      "meta": {
+        "sources": [
+          {
+            "url": "https://ai-sdk.dev/docs/ai-sdk-core/error-handling",
+            "section": "Handling Aborts"
+          }
+        ]
+      }
+    },
+    {
+      "id": "err-05",
+      "input": "How do I tell whether a provider error that happened mid-stream is worth retrying?",
+      "reference": [
+        "Check StreamProviderError.isInstance(error)",
+        "It exposes isRetryable, plus statusCode, code, type and message"
+      ],
+      "answerable": true,
+      "tags": [
+        "category:detail",
+        "topic:errors",
+        "difficulty:medium"
+      ],
+      "checks": {
+        "mustInclude": [
+          "StreamProviderError",
+          "isRetryable"
+        ],
+        "mustNotInclude": []
+      },
+      "evidence": [
+        [
+          "StreamProviderError"
+        ]
+      ],
+      "meta": {
+        "sources": [
+          {
+            "url": "https://ai-sdk.dev/docs/ai-sdk-core/error-handling",
+            "section": "Streams with error support"
+          }
+        ]
+      }
+    },
+    {
+      "id": "set-01",
+      "input": "How many times does generateText retry a failed request by default, and how do I disable retries?",
+      "reference": [
+        "maxRetries defaults to 2",
+        "Set maxRetries: 0 to disable retries"
+      ],
+      "answerable": true,
+      "tags": [
+        "category:detail",
+        "topic:settings",
+        "difficulty:easy"
+      ],
+      "checks": {
+        "mustInclude": [
+          "maxRetries"
+        ],
+        "mustNotInclude": []
+      },
+      "evidence": [
+        [
+          "maxRetries"
+        ]
+      ],
+      "meta": {
+        "sources": [
+          {
+            "url": "https://ai-sdk.dev/docs/ai-sdk-core/settings",
+            "section": "Request options"
+          }
+        ]
+      }
+    },
+    {
+      "id": "set-02",
+      "input": "I want streamText to give up if the model stalls for more than 10 seconds after it started producing output, while allowing the whole call up to 5 minutes. How do I configure that?",
+      "reference": [
+        "Use the timeout option as an object",
+        "totalMs: 300000 bounds the entire call, including all steps",
+        "chunkMs: 10000 is the maximum gap between output chunks after output starts (streaming only)",
+        "firstChunkMs separately bounds the time until the first output of each step"
+      ],
+      "answerable": true,
+      "tags": [
+        "category:detail",
+        "topic:settings",
+        "difficulty:medium"
+      ],
+      "checks": {
+        "mustInclude": [
+          "totalMs",
+          "chunkMs"
+        ],
+        "mustNotInclude": [
+          "AbortSignal.timeout"
+        ]
+      },
+      "evidence": [
+        [
+          "chunkMs"
+        ]
+      ],
+      "meta": {
+        "sources": [
+          {
+            "url": "https://ai-sdk.dev/docs/ai-sdk-core/settings",
+            "section": "timeout"
+          }
+        ]
+      }
+    },
+    {
+      "id": "set-03",
+      "input": "One of my tools calls a slow external API. How do I give only that tool a 60-second timeout while all other tools get 10 seconds?",
+      "reference": [
+        "timeout: { toolMs: 10000, tools: { <toolName>Ms: 60000 } }",
+        "toolMs is the default for all tool executions; per-tool keys named {toolName}Ms inside tools take precedence"
+      ],
+      "answerable": true,
+      "tags": [
+        "category:detail",
+        "topic:settings",
+        "difficulty:hard"
+      ],
+      "checks": {
+        "mustInclude": [
+          "toolMs"
+        ],
+        "mustNotInclude": []
+      },
+      "evidence": [
+        [
+          "toolMs"
+        ]
+      ],
+      "meta": {
+        "sources": [
+          {
+            "url": "https://ai-sdk.dev/docs/ai-sdk-core/settings",
+            "section": "timeout"
+          }
+        ]
+      }
+    },
+    {
+      "id": "set-04",
+      "input": "What temperature does the AI SDK use when I don't set one? I assumed it's 0 so outputs are deterministic.",
+      "reference": [
+        "It is no longer 0 by default (since AI SDK 5.0); when unset, the provider/model default applies",
+        "Set temperature explicitly (or use seed where supported) for more reproducible output",
+        "The docs recommend setting either temperature or topP, not both"
+      ],
+      "answerable": true,
+      "tags": [
+        "category:false-premise",
+        "topic:settings",
+        "difficulty:medium"
+      ],
+      "checks": {
+        "mustInclude": [
+          "temperature"
+        ],
+        "mustNotInclude": []
+      },
+      "evidence": [
+        [
+          "temperature",
+          "topP"
+        ]
+      ],
+      "meta": {
+        "sources": [
+          {
+            "url": "https://ai-sdk.dev/docs/ai-sdk-core/settings",
+            "section": "temperature"
+          }
+        ]
+      }
+    },
+    {
+      "id": "set-05",
+      "input": "What values does the top-level reasoning option accept, and what is its default?",
+      "reference": [
+        "Default is 'provider-default'",
+        "Other values: 'none', 'minimal', 'low', 'medium', 'high', 'xhigh', 'max'",
+        "Provider-specific settings take precedence over values derived from reasoning"
+      ],
+      "answerable": true,
+      "tags": [
+        "category:detail",
+        "topic:settings",
+        "difficulty:medium"
+      ],
+      "checks": {
+        "mustInclude": [
+          "provider-default"
+        ],
+        "mustNotInclude": []
+      },
+      "evidence": [
+        [
+          "provider-default"
+        ]
+      ],
+      "meta": {
+        "sources": [
+          {
+            "url": "https://ai-sdk.dev/docs/ai-sdk-core/settings",
+            "section": "reasoning"
+          }
+        ]
+      }
+    },
+    {
+      "id": "set-06",
+      "input": "I passed topK to a provider that doesn't support it and nothing failed. How can I find out that the setting was ignored?",
+      "reference": [
+        "The SDK generates a warning instead of failing",
+        "Check the warnings property on the result"
+      ],
+      "answerable": true,
+      "tags": [
+        "category:symptom",
+        "topic:settings",
+        "difficulty:medium"
+      ],
+      "checks": {
+        "mustInclude": [
+          "warnings"
+        ],
+        "mustNotInclude": []
+      },
+      "evidence": [
+        [
+          "warnings"
+        ]
+      ],
+      "meta": {
+        "sources": [
+          {
+            "url": "https://ai-sdk.dev/docs/ai-sdk-core/settings",
+            "section": "Settings"
+          }
+        ]
+      }
+    },
+    {
+      "id": "ui-01",
+      "input": "What are the possible values of useChat's status, and what does each mean?",
+      "reference": [
+        "submitted: message sent, waiting for the response stream to start",
+        "streaming: response chunks are arriving",
+        "ready: response complete, a new message can be sent",
+        "error: the request failed"
+      ],
+      "answerable": true,
+      "tags": [
+        "category:detail",
+        "topic:ui",
+        "difficulty:easy"
+      ],
+      "checks": {
+        "mustInclude": [
+          "submitted",
+          "streaming",
+          "ready"
+        ],
+        "mustNotInclude": []
+      },
+      "evidence": [
+        [
+          "submitted",
+          "streaming"
+        ]
+      ],
+      "meta": {
+        "sources": [
+          {
+            "url": "https://ai-sdk.dev/docs/ai-sdk-ui/chatbot",
+            "section": "Status"
+          }
+        ]
+      }
+    },
+    {
+      "id": "ui-02",
+      "input": "How do I bind useChat's input and handleInputChange to my text field?",
+      "reference": [
+        "useChat no longer manages input state; input, handleInputChange and handleSubmit are not part of the current API",
+        "Keep the input in your own state (e.g. useState) and call sendMessage({ text }) on submit"
+      ],
+      "answerable": true,
+      "tags": [
+        "category:false-premise",
+        "topic:ui",
+        "difficulty:hard"
+      ],
+      "checks": {
+        "mustInclude": [
+          "sendMessage"
+        ],
+        "mustNotInclude": [
+          "handleInputChange",
+          "handleSubmit"
+        ]
+      },
+      "evidence": [
+        [
+          "sendMessage"
+        ]
+      ],
+      "meta": {
+        "sources": [
+          {
+            "url": "https://ai-sdk.dev/docs/ai-sdk-ui/chatbot",
+            "section": "Example"
+          }
+        ]
+      }
+    },
+    {
+      "id": "ui-03",
+      "input": "My chat UI renders message.content, but tool calls and reasoning never show up. What am I doing wrong?",
+      "reference": [
+        "Render message.parts, not content",
+        "Iterate the parts and switch on part.type (text, reasoning, tool-<name>, etc.)"
+      ],
+      "answerable": true,
+      "tags": [
+        "category:symptom",
+        "topic:ui",
+        "difficulty:medium"
+      ],
+      "checks": {
+        "mustInclude": [
+          "parts"
+        ],
+        "mustNotInclude": [
+          "message.content"
+        ]
+      },
+      "evidence": [
+        [
+          "parts",
+          "useChat"
+        ]
+      ],
+      "meta": {
+        "sources": [
+          {
+            "url": "https://ai-sdk.dev/docs/ai-sdk-ui/chatbot",
+            "section": "Example"
+          }
+        ]
+      }
+    },
+    {
+      "id": "ui-04",
+      "input": "useChat re-renders on every token during long answers and the page becomes sluggish. How do I reduce the update frequency?",
+      "reference": [
+        "Use the throttle option on useChat (in milliseconds, e.g. 50)",
+        "It throttles reactive message updates in React and Vue; stream processing and callbacks stay immediate"
+      ],
+      "answerable": true,
+      "tags": [
+        "category:symptom",
+        "topic:ui",
+        "difficulty:medium"
+      ],
+      "checks": {
+        "mustInclude": [
+          "throttle"
+        ],
+        "mustNotInclude": [
+          "experimental_throttle"
+        ]
+      },
+      "evidence": [
+        [
+          "throttle"
+        ]
+      ],
+      "meta": {
+        "sources": [
+          {
+            "url": "https://ai-sdk.dev/docs/ai-sdk-ui/chatbot",
+            "section": "Throttling UI Updates"
+          }
+        ]
+      }
+    },
+    {
+      "id": "ui-05",
+      "input": "My chat UI just shows 'An error occurred' no matter what fails on the server. How do I show a more useful message?",
+      "reference": [
+        "Error messages are masked by default for security",
+        "Pass an onError function to toUIMessageStream (or createUIMessageStream) that returns the text to send to the client",
+        "Avoid forwarding sensitive internal details"
+      ],
+      "answerable": true,
+      "tags": [
+        "category:symptom",
+        "topic:ui",
+        "difficulty:medium"
+      ],
+      "checks": {
+        "mustInclude": [
+          "onError",
+          "toUIMessageStream"
+        ],
+        "mustNotInclude": [
+          "getErrorMessage",
+          "toDataStreamResponse"
+        ]
+      },
+      "evidence": [
+        [
+          "onError",
+          "toUIMessageStream"
+        ]
+      ],
+      "meta": {
+        "sources": [
+          {
+            "url": "https://ai-sdk.dev/docs/troubleshooting/use-chat-an-error-occurred",
+            "section": "useChat \"An error occurred\""
+          },
+          {
+            "url": "https://ai-sdk.dev/docs/ai-sdk-ui/chatbot",
+            "section": "Error State"
+          }
+        ]
+      }
+    },
+    {
+      "id": "ui-06",
+      "input": "I redact errors with onError in toUIMessageStream, but some tool errors still reach the client with the raw provider message. Why?",
+      "reference": [
+        "Errors from provider-executed tools (providerExecuted: true) bypass the stream's error masking and its onError callback",
+        "So onError cannot be relied on to redact them"
+      ],
+      "answerable": true,
+      "tags": [
+        "category:symptom",
+        "topic:ui",
+        "difficulty:hard"
+      ],
+      "checks": {
+        "mustInclude": [
+          "providerExecuted"
+        ],
+        "mustNotInclude": []
+      },
+      "evidence": [
+        [
+          "providerExecuted"
+        ]
+      ],
+      "meta": {
+        "sources": [
+          {
+            "url": "https://ai-sdk.dev/docs/ai-sdk-ui/chatbot",
+            "section": "Error State"
+          },
+          {
+            "url": "https://ai-sdk.dev/docs/ai-sdk-ui/chatbot-tool-usage",
+            "section": "Error handling"
+          }
+        ]
+      }
+    },
+    {
+      "id": "ui-07",
+      "input": "useChat sends requests to /api/chat, but my route is /api/assistant. How do I change that?",
+      "reference": [
+        "Pass transport: new DefaultChatTransport({ api: '/api/assistant' })",
+        "The default endpoint is /api/chat"
+      ],
+      "answerable": true,
+      "tags": [
+        "category:detail",
+        "topic:ui",
+        "difficulty:easy"
+      ],
+      "checks": {
+        "mustInclude": [
+          "DefaultChatTransport"
+        ],
+        "mustNotInclude": []
+      },
+      "evidence": [
+        [
+          "DefaultChatTransport"
+        ]
+      ],
+      "meta": {
+        "sources": [
+          {
+            "url": "https://ai-sdk.dev/docs/ai-sdk-ui/chatbot",
+            "section": "Transport"
+          }
+        ]
+      }
+    },
+    {
+      "id": "ui-08",
+      "input": "How do I send only the latest message plus the chat id to my server, instead of the full history on every request?",
+      "reference": [
+        "Use prepareSendMessagesRequest on DefaultChatTransport",
+        "It receives { id, messages, trigger, messageId } and returns a custom body, e.g. { body: { id, message: messages.at(-1) } }",
+        "The server then loads the earlier messages itself"
+      ],
+      "answerable": true,
+      "tags": [
+        "category:detail",
+        "topic:ui",
+        "difficulty:medium"
+      ],
+      "checks": {
+        "mustInclude": [
+          "prepareSendMessagesRequest"
+        ],
+        "mustNotInclude": []
+      },
+      "evidence": [
+        [
+          "prepareSendMessagesRequest"
+        ]
+      ],
+      "meta": {
+        "sources": [
+          {
+            "url": "https://ai-sdk.dev/docs/ai-sdk-ui/chatbot",
+            "section": "Request Configuration"
+          }
+        ]
+      }
+    },
+    {
+      "id": "ui-09",
+      "input": "My backend only returns a plain text stream. Can useChat consume it, and what do I give up?",
+      "reference": [
+        "Yes, with TextStreamChatTransport",
+        "Tool calls, usage and finish reasons are not available with plain text streams"
+      ],
+      "answerable": true,
+      "tags": [
+        "category:detail",
+        "topic:ui",
+        "difficulty:medium"
+      ],
+      "checks": {
+        "mustInclude": [
+          "TextStreamChatTransport"
+        ],
+        "mustNotInclude": []
+      },
+      "evidence": [
+        [
+          "TextStreamChatTransport"
+        ]
+      ],
+      "meta": {
+        "sources": [
+          {
+            "url": "https://ai-sdk.dev/docs/ai-sdk-ui/chatbot",
+            "section": "Text streams"
+          },
+          {
+            "url": "https://ai-sdk.dev/docs/ai-sdk-ui/stream-protocol",
+            "section": "Text Stream Protocol"
+          }
+        ]
+      }
+    },
+    {
+      "id": "ui-10",
+      "input": "Can useChat talk to a ToolLoopAgent directly in the same process, without an HTTP API route?",
+      "reference": [
+        "Yes, with DirectChatTransport({ agent })"
+      ],
+      "answerable": true,
+      "tags": [
+        "category:detail",
+        "topic:ui",
+        "difficulty:medium"
+      ],
+      "checks": {
+        "mustInclude": [
+          "DirectChatTransport"
+        ],
+        "mustNotInclude": []
+      },
+      "evidence": [
+        [
+          "DirectChatTransport"
+        ]
+      ],
+      "meta": {
+        "sources": [
+          {
+            "url": "https://ai-sdk.dev/docs/ai-sdk-ui/chatbot",
+            "section": "Transport"
+          }
+        ]
+      }
+    },
+    {
+      "id": "ui-11",
+      "input": "My model produces reasoning, but the chat UI never receives any reasoning parts. What do I change on the server?",
+      "reference": [
+        "Pass sendReasoning: true to toUIMessageStream",
+        "Reasoning then arrives as reasoning parts (and reasoning-file); sources likewise need sendSources: true"
+      ],
+      "answerable": true,
+      "tags": [
+        "category:symptom",
+        "topic:ui",
+        "difficulty:medium"
+      ],
+      "checks": {
+        "mustInclude": [
+          "sendReasoning"
+        ],
+        "mustNotInclude": []
+      },
+      "evidence": [
+        [
+          "sendReasoning"
+        ]
+      ],
+      "meta": {
+        "sources": [
+          {
+            "url": "https://ai-sdk.dev/docs/ai-sdk-ui/chatbot",
+            "section": "Reasoning"
+          }
+        ]
+      }
+    },
+    {
+      "id": "ui-12",
+      "input": "How do I attach the model id and token usage to each assistant message so the client can display them?",
+      "reference": [
+        "Use the messageMetadata callback of toUIMessageStream on the server; it receives ({ part }) and can return metadata for the start or finish part",
+        "Read it on the client from message.metadata (typed via the UIMessage generic)"
+      ],
+      "answerable": true,
+      "tags": [
+        "category:detail",
+        "topic:ui",
+        "difficulty:medium"
+      ],
+      "checks": {
+        "mustInclude": [
+          "messageMetadata"
+        ],
+        "mustNotInclude": []
+      },
+      "evidence": [
+        [
+          "messageMetadata"
+        ]
+      ],
+      "meta": {
+        "sources": [
+          {
+            "url": "https://ai-sdk.dev/docs/ai-sdk-ui/chatbot",
+            "section": "Message Metadata"
+          }
+        ]
+      }
+    },
+    {
+      "id": "ui-13",
+      "input": "I send a PDF with sendMessage({ text, files }) and the model ignores it, while images work fine. Why?",
+      "reference": [
+        "Only image/* and text/* files are converted to multimodal parts automatically",
+        "Other file types such as PDF must be handled manually"
+      ],
+      "answerable": true,
+      "tags": [
+        "category:symptom",
+        "topic:ui",
+        "difficulty:hard"
+      ],
+      "checks": {
+        "mustInclude": [],
+        "mustNotInclude": []
+      },
+      "evidence": [
+        [
+          "FileList"
+        ]
+      ],
+      "meta": {
+        "sources": [
+          {
+            "url": "https://ai-sdk.dev/docs/ai-sdk-ui/chatbot",
+            "section": "Attachments"
+          }
+        ]
+      }
+    },
+    {
+      "id": "ui-14",
+      "input": "On the client, how can I tell whether a response ended because the user clicked stop, because the network dropped, or because of an error?",
+      "reference": [
+        "useChat's onFinish callback receives { message, messages, isAbort, isDisconnect, isError }"
+      ],
+      "answerable": true,
+      "tags": [
+        "category:detail",
+        "topic:ui",
+        "difficulty:medium"
+      ],
+      "checks": {
+        "mustInclude": [
+          "isAbort",
+          "isDisconnect"
+        ],
+        "mustNotInclude": []
+      },
+      "evidence": [
+        [
+          "isDisconnect"
+        ]
+      ],
+      "meta": {
+        "sources": [
+          {
+            "url": "https://ai-sdk.dev/docs/ai-sdk-ui/chatbot",
+            "section": "Event Callbacks"
+          }
+        ]
+      }
+    },
+    {
+      "id": "ui-15",
+      "input": "In useChat's onToolCall I `await addToolOutput(...)` for a client-side tool, and the chat sometimes hangs. What's wrong?",
+      "reference": [
+        "Don't await addToolOutput inside onToolCall; the docs warn it can cause deadlocks",
+        "Use sendAutomaticallyWhen: lastAssistantMessageIsCompleteWithToolCalls to resubmit once all tool results are available",
+        "Check toolCall.dynamic first so addToolOutput is typed correctly"
+      ],
+      "answerable": true,
+      "tags": [
+        "category:symptom",
+        "topic:ui",
+        "difficulty:hard"
+      ],
+      "checks": {
+        "mustInclude": [
+          "addToolOutput"
+        ],
+        "mustNotInclude": [
+          "addToolResult"
+        ]
+      },
+      "evidence": [
+        [
+          "addToolOutput"
+        ]
+      ],
+      "meta": {
+        "sources": [
+          {
+            "url": "https://ai-sdk.dev/docs/ai-sdk-ui/chatbot-tool-usage",
+            "section": "Client-side tools"
+          }
+        ]
+      }
+    },
+    {
+      "id": "ui-16",
+      "input": "How do I report back to the model that a client-side tool failed?",
+      "reference": [
+        "Call addToolOutput with tool, toolCallId, state: 'output-error' and errorText (instead of output)"
+      ],
+      "answerable": true,
+      "tags": [
+        "category:detail",
+        "topic:ui",
+        "difficulty:medium"
+      ],
+      "checks": {
+        "mustInclude": [
+          "output-error",
+          "errorText"
+        ],
+        "mustNotInclude": [
+          "addToolResult"
+        ]
+      },
+      "evidence": [
+        [
+          "errorText"
+        ]
+      ],
+      "meta": {
+        "sources": [
+          {
+            "url": "https://ai-sdk.dev/docs/ai-sdk-ui/chatbot-tool-usage",
+            "section": "Client-side tools"
+          }
+        ]
+      }
+    },
+    {
+      "id": "data-01",
+      "input": "From a createUIMessageStream route, I want to send a custom 'loading' weather data part and later replace it with the result, without ending up with two separate parts in the message. How?",
+      "reference": [
+        "Write a custom data part (e.g. type 'data-weather') with an id using createUIMessageStream's writer",
+        "Writing another data part with the same id later updates the existing part in place on the client (reconciliation)"
+      ],
+      "answerable": true,
+      "tags": [
+        "category:detail",
+        "topic:streaming-data",
+        "difficulty:medium"
+      ],
+      "checks": {
+        "mustInclude": [
+          "writer.write"
+        ],
+        "mustNotInclude": []
+      },
+      "evidence": [
+        [
+          "data-weather"
+        ]
+      ],
+      "meta": {
+        "sources": [
+          {
+            "url": "https://ai-sdk.dev/docs/ai-sdk-ui/streaming-data",
+            "section": "Data Part Reconciliation"
+          }
+        ]
+      }
+    },
+    {
+      "id": "data-02",
+      "input": "I send a notification as a data part from the server. It shows up in onData, but it's missing from message.parts and isn't saved with the chat. Why?",
+      "reference": [
+        "The part was sent with transient: true",
+        "Transient data parts are delivered only to the onData callback and are never added to message history"
+      ],
+      "answerable": true,
+      "tags": [
+        "category:symptom",
+        "topic:streaming-data",
+        "difficulty:hard"
+      ],
+      "checks": {
+        "mustInclude": [
+          "transient"
+        ],
+        "mustNotInclude": []
+      },
+      "evidence": [
+        [
+          "transient"
+        ]
+      ],
+      "meta": {
+        "sources": [
+          {
+            "url": "https://ai-sdk.dev/docs/ai-sdk-ui/streaming-data",
+            "section": "Transient Data Parts"
+          }
+        ]
+      }
+    },
+    {
+      "id": "data-03",
+      "input": "I write a custom data part in createUIMessageStream and then merge a streamText result into the same stream. How do I avoid sending a second 'start' chunk?",
+      "reference": [
+        "writer.merge(toUIMessageStream({ stream: result.stream, sendStart: false }))",
+        "The start part was already written before the data part"
+      ],
+      "answerable": true,
+      "tags": [
+        "category:detail",
+        "topic:streaming-data",
+        "difficulty:hard"
+      ],
+      "checks": {
+        "mustInclude": [
+          "sendStart"
+        ],
+        "mustNotInclude": []
+      },
+      "evidence": [
+        [
+          "sendStart"
+        ]
+      ],
+      "meta": {
+        "sources": [
+          {
+            "url": "https://ai-sdk.dev/docs/ai-sdk-ui/streaming-data",
+            "section": "Implementation"
+          }
+        ]
+      }
+    },
+    {
+      "id": "data-04",
+      "input": "Our backend is written in Python (FastAPI). Can it stream responses that useChat understands? What does it need to send?",
+      "reference": [
+        "Yes: implement the UI Message Stream protocol: Server-Sent Events whose data lines are JSON parts (start, text-start, text-delta, text-end, finish, ...)",
+        "Set the response header x-vercel-ai-ui-message-stream: v1",
+        "End the stream with data: [DONE]"
+      ],
+      "answerable": true,
+      "tags": [
+        "category:false-premise",
+        "topic:streaming-data",
+        "difficulty:medium"
+      ],
+      "checks": {
+        "mustInclude": [
+          "x-vercel-ai-ui-message-stream"
+        ],
+        "mustNotInclude": []
+      },
+      "evidence": [
+        [
+          "x-vercel-ai-ui-message-stream"
+        ]
+      ],
+      "meta": {
+        "sources": [
+          {
+            "url": "https://ai-sdk.dev/docs/ai-sdk-ui/stream-protocol",
+            "section": "Data Stream Protocol"
+          }
+        ]
+      }
+    },
+    {
+      "id": "res-01",
+      "input": "After enabling resumable streams, clicking Stop no longer stops the model: generation continues and keeps using tokens. Why?",
+      "reference": [
+        "With resumable streams, client-side aborts are treated as disconnects: stop(), closing the tab or refreshing only close the HTTP connection",
+        "Actually stopping requires a dedicated stop endpoint that cancels the active work and clears activeStreamId",
+        "Avoid automatic reconnects for that chat after stopping"
+      ],
+      "answerable": true,
+      "tags": [
+        "category:symptom",
+        "topic:resumable-streams",
+        "difficulty:hard"
+      ],
+      "checks": {
+        "mustInclude": [],
+        "mustNotInclude": []
+      },
+      "evidence": [
+        [
+          "activeStreamId"
+        ]
+      ],
+      "meta": {
+        "sources": [
+          {
+            "url": "https://ai-sdk.dev/docs/ai-sdk-ui/chatbot-resume-streams",
+            "section": "Limitations"
+          }
+        ]
+      }
+    },
+    {
+      "id": "res-02",
+      "input": "What do I need on the server for useChat's resume option to work?",
+      "reference": [
+        "useChat({ resume: true }) sends a GET request to /api/chat/[id]/stream on mount",
+        "The POST handler creates the stream with the resumable-stream package (backed by Redis) via consumeSseStream and saves activeStreamId",
+        "The GET handler returns 204 when there is no activeStreamId, otherwise resumes the existing stream",
+        "onEnd clears activeStreamId"
+      ],
+      "answerable": true,
+      "tags": [
+        "category:detail",
+        "topic:resumable-streams",
+        "difficulty:medium"
+      ],
+      "checks": {
+        "mustInclude": [
+          "resumable-stream",
+          "activeStreamId"
+        ],
+        "mustNotInclude": []
+      },
+      "evidence": [
+        [
+          "activeStreamId"
+        ]
+      ],
+      "meta": {
+        "sources": [
+          {
+            "url": "https://ai-sdk.dev/docs/ai-sdk-ui/chatbot-resume-streams",
+            "section": "Implementation"
+          }
+        ]
+      }
+    },
+    {
+      "id": "out-01",
+      "input": "I use Output.object together with tools in generateText with stopWhen: isStepCount(2), and sometimes reading result.output throws. What's going on?",
+      "reference": [
+        "Structured output generation counts as a step, so tool steps can use up the step budget",
+        "If the final step ends with tool-calls instead of stop, accessing result.output throws NoOutputGeneratedError (output is a getter, so destructuring throws too)",
+        "Raise the stopWhen limit to leave room for tool execution plus the output step"
+      ],
+      "answerable": true,
+      "tags": [
+        "category:symptom",
+        "topic:structured-output",
+        "difficulty:hard"
+      ],
+      "checks": {
+        "mustInclude": [
+          "NoOutputGeneratedError"
+        ],
+        "mustNotInclude": []
+      },
+      "evidence": [
+        [
+          "NoOutputGeneratedError"
+        ]
+      ],
+      "meta": {
+        "sources": [
+          {
+            "url": "https://ai-sdk.dev/docs/ai-sdk-core/generating-structured-data",
+            "section": "Structured outputs with tools"
+          }
+        ]
+      }
+    },
+    {
+      "id": "out-02",
+      "input": "How do I make the model classify a support ticket as exactly one of 'bug', 'feature' or 'question'?",
+      "reference": [
+        "generateText with output: Output.choice({ options: ['bug', 'feature', 'question'] })",
+        "Read the label from result.output"
+      ],
+      "answerable": true,
+      "tags": [
+        "category:detail",
+        "topic:structured-output",
+        "difficulty:easy"
+      ],
+      "checks": {
+        "mustInclude": [
+          "Output.choice"
+        ],
+        "mustNotInclude": [
+          "generateObject(",
+          "experimental_output"
+        ]
+      },
+      "evidence": [
+        [
+          "Output.choice"
+        ]
+      ],
+      "meta": {
+        "sources": [
+          {
+            "url": "https://ai-sdk.dev/docs/reference/ai-sdk-core/output",
+            "section": "Output.choice"
+          }
+        ]
+      }
+    },
+    {
+      "id": "out-03",
+      "input": "I need exactly 5 items from Output.array. How do I enforce that?",
+      "reference": [
+        "Set minItems: 5 and maxItems: 5 (equal values require an exact count)",
+        "Both must be non-negative integers and maxItems must be at least minItems"
+      ],
+      "answerable": true,
+      "tags": [
+        "category:detail",
+        "topic:structured-output",
+        "difficulty:medium"
+      ],
+      "checks": {
+        "mustInclude": [
+          "minItems",
+          "maxItems"
+        ],
+        "mustNotInclude": []
+      },
+      "evidence": [
+        [
+          "minItems",
+          "maxItems"
+        ]
+      ],
+      "meta": {
+        "sources": [
+          {
+            "url": "https://ai-sdk.dev/docs/reference/ai-sdk-core/output",
+            "section": "Output.array"
+          }
+        ]
+      }
+    },
+    {
+      "id": "out-04",
+      "input": "How do I stream each completed, validated item of a generated list one at a time?",
+      "reference": [
+        "Use streamText with output: Output.array({ element })",
+        "Iterate elementStream; each element is complete and validated"
+      ],
+      "answerable": true,
+      "tags": [
+        "category:detail",
+        "topic:structured-output",
+        "difficulty:medium"
+      ],
+      "checks": {
+        "mustInclude": [
+          "elementStream"
+        ],
+        "mustNotInclude": [
+          "streamObject(",
+          "partialObjectStream"
+        ]
+      },
+      "evidence": [
+        [
+          "elementStream"
+        ]
+      ],
+      "meta": {
+        "sources": [
+          {
+            "url": "https://ai-sdk.dev/docs/ai-sdk-core/generating-structured-data",
+            "section": "Streaming arrays"
+          }
+        ]
+      }
+    },
+    {
+      "id": "out-05",
+      "input": "With streamText and Output.array({ element, maxItems: 3 }), what happens if the model starts generating a 4th element? Is generation stopped?",
+      "reference": [
+        "elementStream errors before emitting the first excess element",
+        "The final output promise rejects",
+        "Provider generation is not aborted automatically"
+      ],
+      "answerable": true,
+      "tags": [
+        "category:detail",
+        "topic:structured-output",
+        "difficulty:hard"
+      ],
+      "checks": {
+        "mustInclude": [
+          "elementStream"
+        ],
+        "mustNotInclude": []
+      },
+      "evidence": [
+        [
+          "maxItems"
+        ]
+      ],
+      "meta": {
+        "sources": [
+          {
+            "url": "https://ai-sdk.dev/docs/reference/ai-sdk-core/output",
+            "section": "Output.array"
+          },
+          {
+            "url": "https://ai-sdk.dev/docs/ai-sdk-core/generating-structured-data",
+            "section": "Streaming arrays"
+          }
+        ]
+      }
+    },
+    {
+      "id": "out-06",
+      "input": "I just need valid JSON back with no fixed schema. Which Output should I use, and does it validate the structure?",
+      "reference": [
+        "Output.json()",
+        "It only checks that the response is valid JSON, not its structure or value types"
+      ],
+      "answerable": true,
+      "tags": [
+        "category:detail",
+        "topic:structured-output",
+        "difficulty:medium"
+      ],
+      "checks": {
+        "mustInclude": [
+          "Output.json"
+        ],
+        "mustNotInclude": []
+      },
+      "evidence": [
+        [
+          "Output.json"
+        ]
+      ],
+      "meta": {
+        "sources": [
+          {
+            "url": "https://ai-sdk.dev/docs/reference/ai-sdk-core/output",
+            "section": "Output.json"
+          }
+        ]
+      }
+    },
+    {
+      "id": "out-07",
+      "input": "When structured output fails schema validation, how do I get the raw text the model actually produced?",
+      "reference": [
+        "generateText throws NoObjectGeneratedError; check with NoObjectGeneratedError.isInstance(error)",
+        "error.text holds the raw text; the error also exposes response, usage and cause"
+      ],
+      "answerable": true,
+      "tags": [
+        "category:detail",
+        "topic:structured-output",
+        "difficulty:medium"
+      ],
+      "checks": {
+        "mustInclude": [
+          "NoObjectGeneratedError"
+        ],
+        "mustNotInclude": []
+      },
+      "evidence": [
+        [
+          "NoObjectGeneratedError"
+        ]
+      ],
+      "meta": {
+        "sources": [
+          {
+            "url": "https://ai-sdk.dev/docs/ai-sdk-core/generating-structured-data",
+            "section": "Error Handling"
+          }
+        ]
+      }
+    },
+    {
+      "id": "out-08",
+      "input": "My model wraps its JSON in ```json code fences, so Output.object fails to parse it. How can I fix this without changing the prompt?",
+      "reference": [
+        "Wrap the model with wrapLanguageModel using extractJsonMiddleware()",
+        "It strips markdown code fences before parsing; it accepts an optional transform function"
+      ],
+      "answerable": true,
+      "tags": [
+        "category:symptom",
+        "topic:structured-output",
+        "difficulty:hard"
+      ],
+      "checks": {
+        "mustInclude": [
+          "extractJsonMiddleware"
+        ],
+        "mustNotInclude": []
+      },
+      "evidence": [
+        [
+          "extractJsonMiddleware"
+        ]
+      ],
+      "meta": {
+        "sources": [
+          {
+            "url": "https://ai-sdk.dev/docs/ai-sdk-core/middleware",
+            "section": "Extract JSON"
+          }
+        ]
+      }
+    },
+    {
+      "id": "mw-01",
+      "input": "If I pass middleware: [a, b] to wrapLanguageModel, which middleware is the outermost?",
+      "reference": [
+        "Middlewares are applied in array order as a(b(model)), so the first one (a) is the outermost"
+      ],
+      "answerable": true,
+      "tags": [
+        "category:detail",
+        "topic:middleware",
+        "difficulty:medium"
+      ],
+      "checks": {
+        "mustInclude": [
+          "wrapLanguageModel"
+        ],
+        "mustNotInclude": []
+      },
+      "evidence": [
+        [
+          "wrapLanguageModel"
+        ]
+      ],
+      "meta": {
+        "sources": [
+          {
+            "url": "https://ai-sdk.dev/docs/ai-sdk-core/middleware",
+            "section": "Multiple middlewares"
+          }
+        ]
+      }
+    },
+    {
+      "id": "mw-02",
+      "input": "My open-weights model returns its chain of thought inside <think>...</think> tags mixed into the text. How do I separate it from the answer?",
+      "reference": [
+        "Wrap the model with wrapLanguageModel and extractReasoningMiddleware({ tagName: 'think' })",
+        "The extracted content is exposed as reasoning; startWithReasoning: true prepends the opening tag for models that omit it"
+      ],
+      "answerable": true,
+      "tags": [
+        "category:symptom",
+        "topic:middleware",
+        "difficulty:medium"
+      ],
+      "checks": {
+        "mustInclude": [
+          "extractReasoningMiddleware"
+        ],
+        "mustNotInclude": []
+      },
+      "evidence": [
+        [
+          "extractReasoningMiddleware"
+        ]
+      ],
+      "meta": {
+        "sources": [
+          {
+            "url": "https://ai-sdk.dev/docs/ai-sdk-core/middleware",
+            "section": "Extract Reasoning"
+          }
+        ]
+      }
+    },
+    {
+      "id": "mw-03",
+      "input": "How can I give a model alias default settings (e.g. temperature and providerOptions) everywhere it's used, without repeating them in every call?",
+      "reference": [
+        "Wrap the model with wrapLanguageModel and defaultSettingsMiddleware({ settings })",
+        "Register the wrapped model under an alias in customProvider's languageModels"
+      ],
+      "answerable": true,
+      "tags": [
+        "category:detail",
+        "topic:middleware",
+        "difficulty:medium"
+      ],
+      "checks": {
+        "mustInclude": [
+          "defaultSettingsMiddleware"
+        ],
+        "mustNotInclude": []
+      },
+      "evidence": [
+        [
+          "defaultSettingsMiddleware"
+        ]
+      ],
+      "meta": {
+        "sources": [
+          {
+            "url": "https://ai-sdk.dev/docs/ai-sdk-core/middleware",
+            "section": "Default Settings"
+          },
+          {
+            "url": "https://ai-sdk.dev/docs/ai-sdk-core/provider-management",
+            "section": "Custom Providers"
+          }
+        ]
+      }
+    },
+    {
+      "id": "mw-04",
+      "input": "How do I add a default system prompt to a model that only applies when a call doesn't provide its own?",
+      "reference": [
+        "Use defaultInstructionsMiddleware({ instructions }) with wrapLanguageModel",
+        "It applies the default only when the call has no system message; it accepts a string, a SystemModelMessage or an array of them"
+      ],
+      "answerable": true,
+      "tags": [
+        "category:detail",
+        "topic:middleware",
+        "difficulty:hard"
+      ],
+      "checks": {
+        "mustInclude": [
+          "defaultInstructionsMiddleware"
+        ],
+        "mustNotInclude": []
+      },
+      "evidence": [
+        [
+          "defaultInstructionsMiddleware"
+        ]
+      ],
+      "meta": {
+        "sources": [
+          {
+            "url": "https://ai-sdk.dev/docs/ai-sdk-core/middleware",
+            "section": "Default Instructions"
+          }
+        ]
+      }
+    },
+    {
+      "id": "prov-01",
+      "input": "With createProviderRegistry, how do I reference a model, and can I change the character between the provider and the model id?",
+      "reference": [
+        "Ids look like 'provider:model' (':' is the default separator), e.g. registry.languageModel('openai:<model>')",
+        "Pass { separator: ' > ' } (any string) as the second argument to change it"
+      ],
+      "answerable": true,
+      "tags": [
+        "category:detail",
+        "topic:providers",
+        "difficulty:medium"
+      ],
+      "checks": {
+        "mustInclude": [
+          "separator"
+        ],
+        "mustNotInclude": []
+      },
+      "evidence": [
+        [
+          "createProviderRegistry",
+          "separator"
+        ]
+      ],
+      "meta": {
+        "sources": [
+          {
+            "url": "https://ai-sdk.dev/docs/ai-sdk-core/provider-management",
+            "section": "Provider Registry"
+          }
+        ]
+      }
+    },
+    {
+      "id": "prov-02",
+      "input": "I pass model: 'anthropic/claude-sonnet-5.5' as a plain string and get an authentication error, even though ANTHROPIC_API_KEY is set. Why?",
+      "reference": [
+        "Plain model strings go through the global provider, which is the Vercel AI Gateway by default",
+        "The gateway needs AI_GATEWAY_API_KEY (or OIDC on Vercel), not the Anthropic key",
+        "Alternatively use the @ai-sdk/anthropic provider instance directly, or change the default with globalThis.AI_SDK_DEFAULT_PROVIDER"
+      ],
+      "answerable": true,
+      "tags": [
+        "category:symptom",
+        "topic:providers",
+        "difficulty:hard"
+      ],
+      "checks": {
+        "mustInclude": [
+          "AI_GATEWAY_API_KEY"
+        ],
+        "mustNotInclude": []
+      },
+      "evidence": [
+        [
+          "AI_GATEWAY_API_KEY"
+        ]
+      ],
+      "meta": {
+        "sources": [
+          {
+            "url": "https://ai-sdk.dev/docs/getting-started/choosing-a-provider",
+            "section": "AI Gateway"
+          },
+          {
+            "url": "https://ai-sdk.dev/docs/ai-sdk-core/provider-management",
+            "section": "Global Provider Configuration"
+          }
+        ]
+      }
+    },
+    {
+      "id": "prov-03",
+      "input": "How do I make plain model strings like 'gpt-6-astra' resolve directly through the OpenAI provider instead of the AI Gateway?",
+      "reference": [
+        "Set globalThis.AI_SDK_DEFAULT_PROVIDER = openai once at startup",
+        "Plain ids then resolve through that provider without a prefix"
+      ],
+      "answerable": true,
+      "tags": [
+        "category:detail",
+        "topic:providers",
+        "difficulty:medium"
+      ],
+      "checks": {
+        "mustInclude": [
+          "AI_SDK_DEFAULT_PROVIDER"
+        ],
+        "mustNotInclude": []
+      },
+      "evidence": [
+        [
+          "AI_SDK_DEFAULT_PROVIDER"
+        ]
+      ],
+      "meta": {
+        "sources": [
+          {
+            "url": "https://ai-sdk.dev/docs/ai-sdk-core/provider-management",
+            "section": "Global Provider Configuration"
+          }
+        ]
+      }
+    },
+    {
+      "id": "prov-04",
+      "input": "How do I restrict my app to three approved models through a custom provider, so that any other model id fails?",
+      "reference": [
+        "Use customProvider with only those models in languageModels (optionally under aliases)",
+        "Don't set fallbackProvider; without it only the listed models are available"
+      ],
+      "answerable": true,
+      "tags": [
+        "category:detail",
+        "topic:providers",
+        "difficulty:medium"
+      ],
+      "checks": {
+        "mustInclude": [
+          "customProvider",
+          "fallbackProvider"
+        ],
+        "mustNotInclude": []
+      },
+      "evidence": [
+        [
+          "fallbackProvider"
+        ]
+      ],
+      "meta": {
+        "sources": [
+          {
+            "url": "https://ai-sdk.dev/docs/ai-sdk-core/provider-management",
+            "section": "Limit Available Models"
+          }
+        ]
+      }
+    },
+    {
+      "id": "test-01",
+      "input": "How do I unit test a function that calls generateText without calling a real model?",
+      "reference": [
+        "Use MockLanguageModelV4 from 'ai/test'",
+        "Implement doGenerate returning content (e.g. [{ type: 'text', text }]), finishReason, usage and warnings"
+      ],
+      "answerable": true,
+      "tags": [
+        "category:detail",
+        "topic:testing",
+        "difficulty:medium"
+      ],
+      "checks": {
+        "mustInclude": [
+          "MockLanguageModelV4",
+          "ai/test"
+        ],
+        "mustNotInclude": [
+          "MockLanguageModelV1",
+          "MockLanguageModelV2",
+          "MockLanguageModelV3"
+        ]
+      },
+      "evidence": [
+        [
+          "MockLanguageModelV4"
+        ]
+      ],
+      "meta": {
+        "sources": [
+          {
+            "url": "https://ai-sdk.dev/docs/ai-sdk-core/testing",
+            "section": "generateText"
+          }
+        ]
+      }
+    },
+    {
+      "id": "test-02",
+      "input": "What does the mockValues test helper do once it has returned every value in its array?",
+      "reference": [
+        "It keeps returning the last value"
+      ],
+      "answerable": true,
+      "tags": [
+        "category:detail",
+        "topic:testing",
+        "difficulty:medium"
+      ],
+      "checks": {
+        "mustInclude": [
+          "mockValues"
+        ],
+        "mustNotInclude": []
+      },
+      "evidence": [
+        [
+          "mockValues"
+        ]
+      ],
+      "meta": {
+        "sources": [
+          {
+            "url": "https://ai-sdk.dev/docs/ai-sdk-core/testing",
+            "section": "Test Helpers"
+          }
+        ]
+      }
+    },
+    {
+      "id": "test-03",
+      "input": "In tests, how do I simulate a slow streaming model with a delay before the first chunk and between chunks?",
+      "reference": [
+        "simulateReadableStream({ chunks, initialDelayInMs, chunkDelayInMs }) imported from 'ai'",
+        "Return it from doStream as { stream }"
+      ],
+      "answerable": true,
+      "tags": [
+        "category:detail",
+        "topic:testing",
+        "difficulty:medium"
+      ],
+      "checks": {
+        "mustInclude": [
+          "initialDelayInMs",
+          "chunkDelayInMs"
+        ],
+        "mustNotInclude": []
+      },
+      "evidence": [
+        [
+          "chunkDelayInMs"
+        ]
+      ],
+      "meta": {
+        "sources": [
+          {
+            "url": "https://ai-sdk.dev/docs/ai-sdk-core/testing",
+            "section": "simulateReadableStream"
+          }
+        ]
+      }
+    },
+    {
+      "id": "test-04",
+      "input": "Write a Vitest test for a function that calls streamText, using a mock model that streams 'Hello world'.",
+      "reference": [
+        "new MockLanguageModelV4({ doStream: async () => ({ stream: simulateReadableStream({ chunks: [...] }) }) })",
+        "Chunks are typed events: text-start, text-delta (with delta), text-end, then a finish part with finishReason and usage",
+        "MockLanguageModelV4 comes from 'ai/test', simulateReadableStream from 'ai'"
+      ],
+      "answerable": true,
+      "tags": [
+        "category:code",
+        "topic:testing",
+        "difficulty:hard"
+      ],
+      "checks": {
+        "mustInclude": [
+          "MockLanguageModelV4",
+          "simulateReadableStream",
+          "text-delta"
+        ],
+        "mustNotInclude": [
+          "MockLanguageModelV3",
+          "MockLanguageModelV2",
+          "textDelta"
+        ]
+      },
+      "evidence": [
+        [
+          "simulateReadableStream",
+          "text-delta"
+        ]
+      ],
+      "meta": {
+        "sources": [
+          {
+            "url": "https://ai-sdk.dev/docs/ai-sdk-core/testing",
+            "section": "streamText"
+          }
+        ]
+      }
+    },
+    {
+      "id": "agent-01",
+      "input": "Write a ToolLoopAgent that accepts a typed per-request option tier: 'free' | 'pro' and uses a larger model for pro users.",
+      "reference": [
+        "Define callOptionsSchema: z.object({ tier: z.enum(['free', 'pro']) })",
+        "prepareCall: ({ options, ...settings }) => ({ ...settings, model: options.tier === 'pro' ? <large> : <small> })",
+        "Call agent.generate({ prompt, options: { tier } }); options become required once the schema is defined"
+      ],
+      "answerable": true,
+      "tags": [
+        "category:code",
+        "topic:agents",
+        "difficulty:medium"
+      ],
+      "checks": {
+        "mustInclude": [
+          "callOptionsSchema",
+          "prepareCall"
+        ],
+        "mustNotInclude": []
+      },
+      "evidence": [
+        [
+          "callOptionsSchema"
+        ]
+      ],
+      "meta": {
+        "sources": [
+          {
+            "url": "https://ai-sdk.dev/docs/agents/configuring-call-options",
+            "section": "Dynamic Model Selection"
+          }
+        ]
+      }
+    },
+    {
+      "id": "agent-02",
+      "input": "After I added prepareCall to my agent to switch models, the agent lost its tools and instructions. Why?",
+      "reference": [
+        "prepareCall's return value replaces the settings for that call",
+        "Spread ...settings into the returned object to keep the defaults and override only what you need"
+      ],
+      "answerable": true,
+      "tags": [
+        "category:symptom",
+        "topic:agents",
+        "difficulty:hard"
+      ],
+      "checks": {
+        "mustInclude": [
+          "...settings"
+        ],
+        "mustNotInclude": []
+      },
+      "evidence": [
+        [
+          "prepareCall"
+        ]
+      ],
+      "meta": {
+        "sources": [
+          {
+            "url": "https://ai-sdk.dev/docs/agents/configuring-call-options",
+            "section": "prepareCall"
+          }
+        ]
+      }
+    },
+    {
+      "id": "agent-03",
+      "input": "Does a subagent that I call from inside a tool see the parent agent's conversation history?",
+      "reference": [
+        "No: by default each subagent invocation starts with a fresh context",
+        "To share history, pass the messages from the tool's execute options into the subagent call; the docs advise doing this sparingly"
+      ],
+      "answerable": true,
+      "tags": [
+        "category:detail",
+        "topic:agents",
+        "difficulty:medium"
+      ],
+      "checks": {
+        "mustInclude": [],
+        "mustNotInclude": []
+      },
+      "evidence": [
+        [
+          "subagent"
+        ]
+      ],
+      "meta": {
+        "sources": [
+          {
+            "url": "https://ai-sdk.dev/docs/agents/subagents",
+            "section": "Context isolation"
+          }
+        ]
+      }
+    },
+    {
+      "id": "agent-04",
+      "input": "My parent agent's context fills up with the subagent's entire output. How do I let the parent model see only a short summary while users still see the full run?",
+      "reference": [
+        "Define toModelOutput on the tool that wraps the subagent to map its output to what the parent sees (e.g. the last text part)",
+        "Instruct the subagent to end with a summary so there's something useful to extract"
+      ],
+      "answerable": true,
+      "tags": [
+        "category:symptom",
+        "topic:agents",
+        "difficulty:medium"
+      ],
+      "checks": {
+        "mustInclude": [
+          "toModelOutput"
+        ],
+        "mustNotInclude": []
+      },
+      "evidence": [
+        [
+          "toModelOutput"
+        ]
+      ],
+      "meta": {
+        "sources": [
+          {
+            "url": "https://ai-sdk.dev/docs/agents/subagents",
+            "section": "Controlling what the model sees"
+          }
+        ]
+      }
+    },
+    {
+      "id": "agent-05",
+      "input": "When a user cancels while a subagent is running, the next request fails because the history contains a tool call without a result. How do I handle this?",
+      "reference": [
+        "Pass the execute abortSignal to the subagent; on abort it throws AbortError, which fails the tool and stops the parent loop",
+        "On later requests convert history with convertToModelMessages(messages, { ignoreIncompleteToolCalls: true }) to drop tool calls without results"
+      ],
+      "answerable": true,
+      "tags": [
+        "category:symptom",
+        "topic:agents",
+        "difficulty:hard"
+      ],
+      "checks": {
+        "mustInclude": [
+          "ignoreIncompleteToolCalls"
+        ],
+        "mustNotInclude": []
+      },
+      "evidence": [
+        [
+          "ignoreIncompleteToolCalls"
+        ]
+      ],
+      "meta": {
+        "sources": [
+          {
+            "url": "https://ai-sdk.dev/docs/agents/subagents",
+            "section": "Cancellation"
+          }
+        ]
+      }
+    },
+    {
+      "id": "agent-06",
+      "input": "I stream subagent progress by yielding from an async generator execute, but each yield replaces the previous output instead of appending to it. Is that expected?",
+      "reference": [
+        "Yes: each yield replaces the previous preliminary output",
+        "Yield the cumulative UIMessage, e.g. from readUIMessageStream over the subagent's UI message stream",
+        "On the client, output-available tool parts carry a preliminary flag until the final output arrives"
+      ],
+      "answerable": true,
+      "tags": [
+        "category:symptom",
+        "topic:agents",
+        "difficulty:hard"
+      ],
+      "checks": {
+        "mustInclude": [
+          "readUIMessageStream"
+        ],
+        "mustNotInclude": []
+      },
+      "evidence": [
+        [
+          "readUIMessageStream"
+        ]
+      ],
+      "meta": {
+        "sources": [
+          {
+            "url": "https://ai-sdk.dev/docs/agents/subagents",
+            "section": "Streaming progress"
+          }
+        ]
+      }
+    },
+    {
+      "id": "agent-07",
+      "input": "If I call a WorkflowAgent's stream() without stopWhen, is there a step limit?",
+      "reference": [
+        "No: stream() has no maximum step count when stopWhen is omitted",
+        "Bound it with isStepCount(n); generate() defaults to 20 steps",
+        "An answer saying WorkflowAgent has no default step limit is acceptable for stream()"
+      ],
+      "answerable": true,
+      "tags": [
+        "category:detail",
+        "topic:agents",
+        "difficulty:hard"
+      ],
+      "checks": {
+        "mustInclude": [
+          "isStepCount"
+        ],
+        "mustNotInclude": []
+      },
+      "evidence": [
+        [
+          "WorkflowAgent",
+          "isStepCount"
+        ]
+      ],
+      "meta": {
+        "sources": [
+          {
+            "url": "https://ai-sdk.dev/docs/reference/ai-sdk-workflow/workflow-agent",
+            "section": "Step limits"
+          },
+          {
+            "url": "https://ai-sdk.dev/docs/agents/loop-control",
+            "section": "Default step limits"
+          }
+        ]
+      }
+    },
+    {
+      "id": "agent-08",
+      "input": "In a WorkflowAgent, how do I make a tool's execute function a durable step with automatic retries and persistence?",
+      "reference": [
+        "Mark the execute function with the 'use step' directive",
+        "repairToolCall and experimental_download must also be marked 'use step' inside a workflow"
+      ],
+      "answerable": true,
+      "tags": [
+        "category:detail",
+        "topic:agents",
+        "difficulty:hard"
+      ],
+      "checks": {
+        "mustInclude": [
+          "use step"
+        ],
+        "mustNotInclude": []
+      },
+      "evidence": [
+        [
+          "use step"
+        ]
+      ],
+      "meta": {
+        "sources": [
+          {
+            "url": "https://ai-sdk.dev/docs/reference/ai-sdk-workflow/workflow-agent",
+            "section": "Tools"
+          }
+        ]
+      }
+    },
+    {
+      "id": "agent-09",
+      "input": "Can I put my database client into runtimeContext for a WorkflowAgent?",
+      "reference": [
+        "No: for WorkflowAgent, runtimeContext and toolsContext must be serializable",
+        "Pass identifiers and recreate clients inside step functions"
+      ],
+      "answerable": true,
+      "tags": [
+        "category:false-premise",
+        "topic:agents",
+        "difficulty:medium"
+      ],
+      "checks": {
+        "mustInclude": [
+          "serializable"
+        ],
+        "mustNotInclude": []
+      },
+      "evidence": [
+        [
+          "serializable"
+        ]
+      ],
+      "meta": {
+        "sources": [
+          {
+            "url": "https://ai-sdk.dev/docs/reference/ai-sdk-workflow/workflow-agent",
+            "section": "Durability"
+          }
+        ]
+      }
+    },
+    {
+      "id": "agent-10",
+      "input": "What is the maximum number of steps a ToolLoopAgent can be configured to run?",
+      "reference": [
+        "The docs define no hard maximum; the default is isStepCount(20)",
+        "Raise it with isStepCount(n) or remove the limit with isLoopFinished()",
+        "Wrong if it invents a maximum"
+      ],
+      "answerable": true,
+      "tags": [
+        "category:false-premise",
+        "topic:agents",
+        "difficulty:hard"
+      ],
+      "checks": {
+        "mustInclude": [],
+        "mustNotInclude": []
+      },
+      "evidence": [
+        [
+          "isLoopFinished"
+        ]
+      ],
+      "meta": {
+        "sources": [
+          {
+            "url": "https://ai-sdk.dev/docs/agents/loop-control",
+            "section": "Stop conditions"
+          }
+        ]
+      }
+    },
+    {
+      "id": "tool-01",
+      "input": "I set toolChoice: 'none', but the model still returned a tool call. What does generateText do in that case?",
+      "reference": [
+        "generateText raises ToolChoiceViolationError",
+        "In streamText the tool parts are withheld, so client-side tools aren't invoked either"
+      ],
+      "answerable": true,
+      "tags": [
+        "category:detail",
+        "topic:tools",
+        "difficulty:hard"
+      ],
+      "checks": {
+        "mustInclude": [
+          "ToolChoiceViolationError"
+        ],
+        "mustNotInclude": []
+      },
+      "evidence": [
+        [
+          "ToolChoiceViolationError"
+        ]
+      ],
+      "meta": {
+        "sources": [
+          {
+            "url": "https://ai-sdk.dev/docs/ai-sdk-core/tools-and-tool-calling",
+            "section": "Tool Choice"
+          }
+        ]
+      }
+    },
+    {
+      "id": "tool-02",
+      "input": "Can a tool's description change depending on per-request context?",
+      "reference": [
+        "Yes: description can be a function that receives the tool's context (and experimental_sandbox)",
+        "It is resolved before each step"
+      ],
+      "answerable": true,
+      "tags": [
+        "category:detail",
+        "topic:tools",
+        "difficulty:medium"
+      ],
+      "checks": {
+        "mustInclude": [],
+        "mustNotInclude": []
+      },
+      "evidence": [
+        [
+          "contextSchema"
+        ]
+      ],
+      "meta": {
+        "sources": [
+          {
+            "url": "https://ai-sdk.dev/docs/ai-sdk-core/tools-and-tool-calling",
+            "section": "Tool definition"
+          },
+          {
+            "url": "https://ai-sdk.dev/docs/ai-sdk-core/runtime-and-tool-context",
+            "section": "Tool context"
+          }
+        ]
+      }
+    },
+    {
+      "id": "tool-03",
+      "input": "How do I ask the provider for strictly schema-conformant tool calls for one particular tool?",
+      "reference": [
+        "Set strict: true on that tool()",
+        "It is off by default and ignored by providers that don't support it"
+      ],
+      "answerable": true,
+      "tags": [
+        "category:detail",
+        "topic:tools",
+        "difficulty:medium"
+      ],
+      "checks": {
+        "mustInclude": [
+          "strict"
+        ],
+        "mustNotInclude": []
+      },
+      "evidence": [
+        [
+          "strict"
+        ]
+      ],
+      "meta": {
+        "sources": [
+          {
+            "url": "https://ai-sdk.dev/docs/ai-sdk-core/tools-and-tool-calling",
+            "section": "Strict Mode"
+          }
+        ]
+      }
+    },
+    {
+      "id": "tool-04",
+      "input": "I added inputExamples to my tools, but OpenAI models don't seem to use them. Why, and how can I make them work?",
+      "reference": [
+        "inputExamples is natively supported only by Anthropic providers; others ignore it",
+        "Use addToolInputExamplesMiddleware to append the examples to the tool descriptions (default prefix 'Input Examples:', remove defaults to true)"
+      ],
+      "answerable": true,
+      "tags": [
+        "category:multi-hop",
+        "topic:tools",
+        "difficulty:hard"
+      ],
+      "checks": {
+        "mustInclude": [
+          "addToolInputExamplesMiddleware"
+        ],
+        "mustNotInclude": []
+      },
+      "evidence": [
+        [
+          "addToolInputExamplesMiddleware"
+        ]
+      ],
+      "meta": {
+        "sources": [
+          {
+            "url": "https://ai-sdk.dev/docs/ai-sdk-core/tools-and-tool-calling",
+            "section": "Input Examples"
+          },
+          {
+            "url": "https://ai-sdk.dev/docs/ai-sdk-core/middleware",
+            "section": "Tool Input Examples"
+          }
+        ]
+      }
+    },
+    {
+      "id": "tool-05",
+      "input": "How can a long-running tool report progress to the UI before returning its final result?",
+      "reference": [
+        "Make execute an async generator",
+        "Earlier yields are preliminary results (status updates); the last yielded value becomes the final result"
+      ],
+      "answerable": true,
+      "tags": [
+        "category:detail",
+        "topic:tools",
+        "difficulty:medium"
+      ],
+      "checks": {
+        "mustInclude": [
+          "yield"
+        ],
+        "mustNotInclude": []
+      },
+      "evidence": [
+        [
+          "preliminary"
+        ]
+      ],
+      "meta": {
+        "sources": [
+          {
+            "url": "https://ai-sdk.dev/docs/ai-sdk-core/tools-and-tool-calling",
+            "section": "Preliminary Tool Results"
+          }
+        ]
+      }
+    },
+    {
+      "id": "tool-06",
+      "input": "My tool's onInputDelta callback never fires, although onInputStart and onInputAvailable do. Why?",
+      "reference": [
+        "onInputDelta fires only with streamText; with generateText you only get onInputStart and onInputAvailable"
+      ],
+      "answerable": true,
+      "tags": [
+        "category:symptom",
+        "topic:tools",
+        "difficulty:hard"
+      ],
+      "checks": {
+        "mustInclude": [
+          "streamText"
+        ],
+        "mustNotInclude": []
+      },
+      "evidence": [
+        [
+          "onInputDelta"
+        ]
+      ],
+      "meta": {
+        "sources": [
+          {
+            "url": "https://ai-sdk.dev/docs/ai-sdk-core/tools-and-tool-calling",
+            "section": "Tool input lifecycle hooks"
+          }
+        ]
+      }
+    },
+    {
+      "id": "tool-07",
+      "input": "My tools are loaded at runtime from a config file, so TypeScript can't know their schemas. What should I use, and how do I tell those calls apart from static ones?",
+      "reference": [
+        "Define them with dynamicTool; its execute input is typed unknown and must be validated at runtime",
+        "Check toolCall.dynamic to narrow dynamic vs static calls (in the UI they appear as 'dynamic-tool' parts)"
+      ],
+      "answerable": true,
+      "tags": [
+        "category:detail",
+        "topic:tools",
+        "difficulty:medium"
+      ],
+      "checks": {
+        "mustInclude": [
+          "dynamicTool"
+        ],
+        "mustNotInclude": []
+      },
+      "evidence": [
+        [
+          "dynamicTool"
+        ]
+      ],
+      "meta": {
+        "sources": [
+          {
+            "url": "https://ai-sdk.dev/docs/ai-sdk-core/tools-and-tool-calling",
+            "section": "Dynamic Tools"
+          }
+        ]
+      }
+    },
+    {
+      "id": "ctx-01",
+      "input": "A tool grants the user a new permission mid-run. How do I make tool calls in later steps receive the updated context?",
+      "reference": [
+        "Tool context is treated as immutable inside tools",
+        "Inspect the previous step in prepareStep and return an updated toolsContext (runtimeContext can be updated the same way and applies to the current and later steps)"
+      ],
+      "answerable": true,
+      "tags": [
+        "category:detail",
+        "topic:context",
+        "difficulty:hard"
+      ],
+      "checks": {
+        "mustInclude": [
+          "prepareStep",
+          "toolsContext"
+        ],
+        "mustNotInclude": []
+      },
+      "evidence": [
+        [
+          "toolsContext",
+          "prepareStep"
+        ]
+      ],
+      "meta": {
+        "sources": [
+          {
+            "url": "https://ai-sdk.dev/docs/ai-sdk-core/runtime-and-tool-context",
+            "section": "Updating context between steps"
+          }
+        ]
+      }
+    },
+    {
+      "id": "ctx-02",
+      "input": "Is runtimeContext automatically added to the prompt, so the model knows things like the user's plan tier?",
+      "reference": [
+        "No, runtimeContext is never added to the prompt automatically",
+        "It's also not passed to tool execute or description functions; it's visible in prepareStep, lifecycle callbacks, step results, approval callbacks and (filtered) telemetry"
+      ],
+      "answerable": true,
+      "tags": [
+        "category:false-premise",
+        "topic:context",
+        "difficulty:medium"
+      ],
+      "checks": {
+        "mustInclude": [
+          "runtimeContext"
+        ],
+        "mustNotInclude": []
+      },
+      "evidence": [
+        [
+          "runtimeContext"
+        ]
+      ],
+      "meta": {
+        "sources": [
+          {
+            "url": "https://ai-sdk.dev/docs/ai-sdk-core/runtime-and-tool-context",
+            "section": "Runtime context"
+          }
+        ]
+      }
+    },
+    {
+      "id": "tel-01",
+      "input": "I pass an API key to a tool through toolsContext. Will it show up in my OpenTelemetry traces?",
+      "reference": [
+        "Not by default: tool context is excluded from telemetry unless you list properties under telemetry.includeToolsContext",
+        "runtimeContext works the same way with telemetry.includeRuntimeContext",
+        "Filtering is shallow, applies only to telemetry integrations, and is not a general security boundary"
+      ],
+      "answerable": true,
+      "tags": [
+        "category:detail",
+        "topic:telemetry",
+        "difficulty:hard"
+      ],
+      "checks": {
+        "mustInclude": [
+          "includeToolsContext"
+        ],
+        "mustNotInclude": []
+      },
+      "evidence": [
+        [
+          "includeToolsContext"
+        ]
+      ],
+      "meta": {
+        "sources": [
+          {
+            "url": "https://ai-sdk.dev/docs/ai-sdk-core/telemetry",
+            "section": "Hiding sensitive data"
+          },
+          {
+            "url": "https://ai-sdk.dev/docs/ai-sdk-core/runtime-and-tool-context",
+            "section": "Telemetry filtering"
+          }
+        ]
+      }
+    },
+    {
+      "id": "tel-02",
+      "input": "How do I keep prompts and model outputs out of my traces while still recording spans and timing?",
+      "reference": [
+        "Set telemetry: { recordInputs: false, recordOutputs: false } (both record by default)",
+        "Raw provider bodies and provider metadata are then omitted as well"
+      ],
+      "answerable": true,
+      "tags": [
+        "category:detail",
+        "topic:telemetry",
+        "difficulty:medium"
+      ],
+      "checks": {
+        "mustInclude": [
+          "recordInputs",
+          "recordOutputs"
+        ],
+        "mustNotInclude": []
+      },
+      "evidence": [
+        [
+          "recordInputs"
+        ]
+      ],
+      "meta": {
+        "sources": [
+          {
+            "url": "https://ai-sdk.dev/docs/ai-sdk-core/telemetry",
+            "section": "Recording inputs and outputs"
+          }
+        ]
+      }
+    },
+    {
+      "id": "tel-03",
+      "input": "My tracing dashboard filters on the span name ai.generateText, but nothing shows up since I switched to the OpenTelemetry integration from @ai-sdk/otel. Why?",
+      "reference": [
+        "The OpenTelemetry integration uses GenAI semantic-convention span names: invoke_agent {modelId}, step {n}, chat {modelId}, execute_tool {toolName}",
+        "The old ai.* span names (ai.generateText, ai.streamText, ai.toolCall) come from LegacyOpenTelemetry"
+      ],
+      "answerable": true,
+      "tags": [
+        "category:symptom",
+        "topic:telemetry",
+        "difficulty:hard"
+      ],
+      "checks": {
+        "mustInclude": [
+          "LegacyOpenTelemetry"
+        ],
+        "mustNotInclude": []
+      },
+      "evidence": [
+        [
+          "LegacyOpenTelemetry"
+        ]
+      ],
+      "meta": {
+        "sources": [
+          {
+            "url": "https://ai-sdk.dev/docs/ai-sdk-core/telemetry",
+            "section": "Span names"
+          }
+        ]
+      }
+    },
+    {
+      "id": "tel-04",
+      "input": "I registered OpenTelemetry globally and passed telemetry: { integrations: [DevToolsTelemetry()] } on one call. That call disappeared from my OTel traces. Why?",
+      "reference": [
+        "Per-call integrations replace the globally registered integrations for that call",
+        "List both integrations on that call if you want both"
+      ],
+      "answerable": true,
+      "tags": [
+        "category:symptom",
+        "topic:telemetry",
+        "difficulty:hard"
+      ],
+      "checks": {
+        "mustInclude": [
+          "integrations"
+        ],
+        "mustNotInclude": []
+      },
+      "evidence": [
+        [
+          "DevToolsTelemetry"
+        ]
+      ],
+      "meta": {
+        "sources": [
+          {
+            "url": "https://ai-sdk.dev/docs/ai-sdk-core/telemetry",
+            "section": "Per-call integrations"
+          }
+        ]
+      }
+    },
+    {
+      "id": "tel-05",
+      "input": "How do I open AI SDK DevTools to inspect my runs, and where does it store the captured data?",
+      "reference": [
+        "Register DevToolsTelemetry from @ai-sdk/devtools (via registerTelemetry or per call)",
+        "Run npx @ai-sdk/devtools@latest and open http://localhost:4983",
+        "Data is stored in plain text in .devtools/generations.json (added to .gitignore); it's for local development only"
+      ],
+      "answerable": true,
+      "tags": [
+        "category:detail",
+        "topic:devtools",
+        "difficulty:medium"
+      ],
+      "checks": {
+        "mustInclude": [
+          "@ai-sdk/devtools"
+        ],
+        "mustNotInclude": []
+      },
+      "evidence": [
+        [
+          "@ai-sdk/devtools"
+        ]
+      ],
+      "meta": {
+        "sources": [
+          {
+            "url": "https://ai-sdk.dev/docs/ai-sdk-core/devtools",
+            "section": "Setup"
+          }
+        ]
+      }
+    },
+    {
+      "id": "tel-06",
+      "input": "DevTools shows my streamText runs, but the raw provider response body is always missing. How do I see it?",
+      "reference": [
+        "Raw request and response bodies are excluded by default in AI SDK 7",
+        "For streamText (and ToolLoopAgent.stream()) only include: { requestBody: true } is available; the response body cannot be retained",
+        "For generateText use include: { requestBody: true, responseBody: true }"
+      ],
+      "answerable": true,
+      "tags": [
+        "category:multi-hop",
+        "topic:devtools",
+        "difficulty:hard"
+      ],
+      "checks": {
+        "mustInclude": [
+          "requestBody"
+        ],
+        "mustNotInclude": []
+      },
+      "evidence": [
+        [
+          "requestBody"
+        ]
+      ],
+      "meta": {
+        "sources": [
+          {
+            "url": "https://ai-sdk.dev/docs/ai-sdk-core/devtools",
+            "section": "Body retention"
+          },
+          {
+            "url": "https://ai-sdk.dev/docs/migration-guides/migration-guide-7-0",
+            "section": "Request and response bodies excluded by default"
+          }
+        ]
+      }
+    },
+    {
+      "id": "tel-07",
+      "input": "Why doesn't the gen_ai.client.inference.duration metric show up in my monitoring?",
+      "reference": [
+        "It requires a configured MeterProvider",
+        "LegacyOpenTelemetry doesn't emit it; the OpenTelemetry integration records it (in seconds) for generateText and streamText"
+      ],
+      "answerable": true,
+      "tags": [
+        "category:symptom",
+        "topic:telemetry",
+        "difficulty:hard"
+      ],
+      "checks": {
+        "mustInclude": [
+          "MeterProvider"
+        ],
+        "mustNotInclude": []
+      },
+      "evidence": [
+        [
+          "MeterProvider"
+        ]
+      ],
+      "exclude": "snapshot gap: The Metrics section (gen_ai.client.inference.duration, MeterProvider) is in the live docs (2026-11-06) but not in the 2026-11-01 snapshot: neither term appears in data/corpus. Answerable only after a snapshot refresh; until then 'not in the docs' is the faithful answer. Excluded from v5 hard-set results.",
+      "meta": {
+        "sources": [
+          {
+            "url": "https://ai-sdk.dev/docs/ai-sdk-core/telemetry",
+            "section": "Metrics"
+          }
+        ]
+      }
+    },
+    {
+      "id": "img-01",
+      "input": "I request n: 10 images from a model that only allows 1 image per call. What happens, and can I control the batching?",
+      "reference": [
+        "generateImage calls the model as many times as needed, in parallel, to produce n images",
+        "The default batch size follows provider-documented per-call limits; override it with maxImagesPerCall"
+      ],
+      "answerable": true,
+      "tags": [
+        "category:detail",
+        "topic:images",
+        "difficulty:medium"
+      ],
+      "checks": {
+        "mustInclude": [
+          "maxImagesPerCall"
+        ],
+        "mustNotInclude": []
+      },
+      "evidence": [
+        [
+          "maxImagesPerCall"
+        ]
+      ],
+      "meta": {
+        "sources": [
+          {
+            "url": "https://ai-sdk.dev/docs/ai-sdk-core/image-generation",
+            "section": "Generating Multiple Images"
+          }
+        ]
+      }
+    },
+    {
+      "id": "img-02",
+      "input": "I'm using a Gemini model that can output images through generateText. Where do the generated images come back?",
+      "reference": [
+        "In result.files",
+        "Each file has base64, uint8Array and mediaType (e.g. image/png); filter with file.mediaType.startsWith('image/')"
+      ],
+      "answerable": true,
+      "tags": [
+        "category:detail",
+        "topic:images",
+        "difficulty:medium"
+      ],
+      "checks": {
+        "mustInclude": [
+          "files"
+        ],
+        "mustNotInclude": []
+      },
+      "evidence": [
+        [
+          "mediaType"
+        ]
+      ],
+      "meta": {
+        "sources": [
+          {
+            "url": "https://ai-sdk.dev/docs/ai-sdk-core/image-generation",
+            "section": "Generating Images with Language Models"
+          }
+        ]
+      }
+    },
+    {
+      "id": "img-03",
+      "input": "When an image provider blocks my prompt for moderation and returns no image, does generateImage keep retrying?",
+      "reference": [
+        "Unclassified empty responses are retried according to maxRetries",
+        "Providers can mark terminal empty responses such as moderation blocks with isRetryable: false, which skips retries",
+        "The failure surfaces as NoImageGeneratedError"
+      ],
+      "answerable": true,
+      "tags": [
+        "category:detail",
+        "topic:images",
+        "difficulty:hard"
+      ],
+      "checks": {
+        "mustInclude": [
+          "NoImageGeneratedError"
+        ],
+        "mustNotInclude": []
+      },
+      "evidence": [
+        [
+          "NoImageGeneratedError"
+        ]
+      ],
+      "meta": {
+        "sources": [
+          {
+            "url": "https://ai-sdk.dev/docs/ai-sdk-core/image-generation",
+            "section": "Error Handling"
+          }
+        ]
+      }
+    },
+    {
+      "id": "rr-01",
+      "input": "Can rerank work with JSON objects instead of strings, and how do I get the best-matching object back?",
+      "reference": [
+        "Yes, documents can be strings or JSON objects",
+        "result.rerankedDocuments[0] is the top document; ranking contains originalIndex, score and document"
+      ],
+      "answerable": true,
+      "tags": [
+        "category:detail",
+        "topic:reranking",
+        "difficulty:easy"
+      ],
+      "checks": {
+        "mustInclude": [
+          "rerankedDocuments"
+        ],
+        "mustNotInclude": []
+      },
+      "evidence": [
+        [
+          "rerankedDocuments"
+        ]
+      ],
+      "meta": {
+        "sources": [
+          {
+            "url": "https://ai-sdk.dev/docs/ai-sdk-core/reranking",
+            "section": "Working with Object Documents"
+          }
+        ]
+      }
+    },
+    {
+      "id": "sm-01",
+      "input": "I use smoothStream and Japanese answers arrive in big, uneven bursts instead of flowing smoothly. How do I fix it?",
+      "reference": [
+        "The default word chunking doesn't work well for languages without spaces between words (Chinese, Japanese, Korean, Vietnamese, Thai)",
+        "Pass chunking: new Intl.Segmenter('ja', { granularity: 'word' })"
+      ],
+      "answerable": true,
+      "tags": [
+        "category:symptom",
+        "topic:streaming",
+        "difficulty:hard"
+      ],
+      "checks": {
+        "mustInclude": [
+          "Intl.Segmenter"
+        ],
+        "mustNotInclude": []
+      },
+      "evidence": [
+        [
+          "Intl.Segmenter"
+        ]
+      ],
+      "meta": {
+        "sources": [
+          {
+            "url": "https://ai-sdk.dev/docs/reference/ai-sdk-core/smooth-stream",
+            "section": "chunking"
+          }
+        ]
+      }
+    },
+    {
+      "id": "sm-02",
+      "input": "What delay does smoothStream use between chunks by default, and how do I turn the delay off?",
+      "reference": [
+        "delayInMs defaults to 10 ms",
+        "Set delayInMs: null to disable delays (they are also skipped while the document is hidden)",
+        "It is passed through streamText's experimental_transform option"
+      ],
+      "answerable": true,
+      "tags": [
+        "category:detail",
+        "topic:streaming",
+        "difficulty:medium"
+      ],
+      "checks": {
+        "mustInclude": [
+          "delayInMs"
+        ],
+        "mustNotInclude": []
+      },
+      "evidence": [
+        [
+          "delayInMs"
+        ]
+      ],
+      "meta": {
+        "sources": [
+          {
+            "url": "https://ai-sdk.dev/docs/reference/ai-sdk-core/smooth-stream",
+            "section": "delayInMs"
+          }
+        ]
+      }
+    },
+    {
+      "id": "code-01",
+      "input": "Write a Next.js route handler that streams a chat response to useChat with reasoning and sources enabled, replacing any error details with 'Something went wrong'.",
+      "reference": [
+        "Call streamText with the converted UI messages (convertToModelMessages)",
+        "return createUIMessageStreamResponse({ stream: toUIMessageStream({ stream: result.stream, sendReasoning: true, sendSources: true, onError: () => 'Something went wrong' }) })"
+      ],
+      "answerable": true,
+      "tags": [
+        "category:code",
+        "topic:ui",
+        "difficulty:medium"
+      ],
+      "checks": {
+        "mustInclude": [
+          "createUIMessageStreamResponse",
+          "sendReasoning",
+          "onError"
+        ],
+        "mustNotInclude": [
+          "toDataStreamResponse",
+          "result.toUIMessageStreamResponse"
+        ]
+      },
+      "evidence": [
+        [
+          "sendReasoning"
+        ]
+      ],
+      "meta": {
+        "sources": [
+          {
+            "url": "https://ai-sdk.dev/docs/ai-sdk-ui/chatbot",
+            "section": "Reasoning"
+          },
+          {
+            "url": "https://ai-sdk.dev/docs/troubleshooting/use-chat-an-error-occurred",
+            "section": "Fix"
+          }
+        ]
+      }
+    },
+    {
+      "id": "anc-01",
+      "input": "Why is response.body empty on my generateText result in v7, and how do I get it back?",
+      "reference": [
+        "Request and response bodies are excluded by default in v7",
+        "Opt in with include: { requestBody: true, responseBody: true }",
+        "For streamText only requestBody is available"
+      ],
+      "answerable": true,
+      "tags": [
+        "category:symptom",
+        "topic:core",
+        "difficulty:hard"
+      ],
+      "checks": {
+        "mustInclude": [
+          "responseBody"
+        ],
+        "mustNotInclude": []
+      },
+      "evidence": [
+        [
+          "responseBody"
+        ]
+      ],
+      "meta": {
+        "sources": [
+          {
+            "url": "https://ai-sdk.dev/docs/migration-guides/migration-guide-7-0",
+            "section": "Request and response bodies excluded by default"
+          }
+        ]
+      }
+    },
+    {
+      "id": "anc-02",
+      "input": "Rewrite for AI SDK v7:\n\nconst result = streamText({\n  model,\n  system: 'You are helpful.',\n  prompt,\n  experimental_include: { requestBody: true },\n  onStepFinish: (s) => log(s),\n  onFinish: (r) => save(r),\n});\nfor await (const part of result.fullStream) handle(part);",
+      "reference": [
+        "system -> instructions",
+        "experimental_include -> include",
+        "onStepFinish -> onStepEnd",
+        "onFinish -> onEnd",
+        "result.fullStream -> result.stream"
+      ],
+      "answerable": true,
+      "tags": [
+        "category:code",
+        "topic:core",
+        "difficulty:hard"
+      ],
+      "checks": {
+        "mustInclude": [
+          "instructions",
+          "onStepEnd",
+          "onEnd",
+          "result.stream"
+        ],
+        "mustNotInclude": [
+          "fullStream",
+          "onFinish",
+          "onStepFinish",
+          "experimental_include",
+          "system:"
+        ]
+      },
+      "evidence": [
+        [
+          "onStepEnd"
+        ]
+      ],
+      "meta": {
+        "sources": [
+          {
+            "url": "https://ai-sdk.dev/docs/migration-guides/migration-guide-7-0",
+            "section": "Lifecycle Callbacks"
+          }
+        ]
+      }
+    },
+    {
+      "id": "un-01",
+      "input": "How long do resumable streams stay in Redis before they expire?",
+      "reference": [
+        "The docs only say the expiry is set by the resumable-stream package; no duration is given. The bot must not invent a number"
+      ],
+      "answerable": false,
+      "tags": [
+        "category:unanswerable",
+        "topic:resumable-streams",
+        "difficulty:medium",
+        "unanswerable"
+      ],
+      "checks": {
+        "mustInclude": [],
+        "mustNotInclude": []
+      },
+      "evidence": [],
+      "meta": {
+        "sources": [
+          {
+            "url": "https://ai-sdk.dev/docs/ai-sdk-ui/chatbot-resume-streams",
+            "section": "Limitations"
+          }
+        ]
+      }
+    },
+    {
+      "id": "un-02",
+      "input": "What is the maximum file size I can attach with sendMessage({ files })?",
+      "reference": [
+        "Not documented. The bot must not borrow unrelated limits such as the DevTools 5 MiB media preview limit"
+      ],
+      "answerable": false,
+      "tags": [
+        "category:unanswerable",
+        "topic:ui",
+        "difficulty:hard",
+        "unanswerable"
+      ],
+      "checks": {
+        "mustInclude": [],
+        "mustNotInclude": []
+      },
+      "evidence": [],
+      "meta": {
+        "sources": [
+          {
+            "url": "https://ai-sdk.dev/docs/ai-sdk-ui/chatbot",
+            "section": "Attachments"
+          }
+        ]
+      }
+    },
+    {
+      "id": "un-03",
+      "input": "How long does AI SDK DevTools keep captured runs before deleting them?",
+      "reference": [
+        "Not documented. Data is stored in .devtools/generations.json, but no retention period is given"
+      ],
+      "answerable": false,
+      "tags": [
+        "category:unanswerable",
+        "topic:devtools",
+        "difficulty:medium",
+        "unanswerable"
+      ],
+      "checks": {
+        "mustInclude": [],
+        "mustNotInclude": []
+      },
+      "evidence": [],
+      "meta": {
+        "sources": [
+          {
+            "url": "https://ai-sdk.dev/docs/ai-sdk-core/devtools",
+            "section": "Setup"
+          }
+        ]
+      }
+    },
+    {
+      "id": "un-04",
+      "input": "Which provider behind the AI Gateway is the cheapest for Claude models?",
+      "reference": [
+        "Not in the docs. The bot must not name a provider as cheapest"
+      ],
+      "answerable": false,
+      "tags": [
+        "category:unanswerable",
+        "topic:providers",
+        "difficulty:easy",
+        "unanswerable"
+      ],
+      "checks": {
+        "mustInclude": [],
+        "mustNotInclude": []
+      },
+      "evidence": [],
+      "meta": {
+        "sources": []
+      }
+    },
+    {
+      "id": "un-05",
+      "input": "How many requests per minute can I send through the AI Gateway before I get rate limited?",
+      "reference": [
+        "Not in the AI SDK docs. The bot must not invent a limit"
+      ],
+      "answerable": false,
+      "tags": [
+        "category:unanswerable",
+        "topic:providers",
+        "difficulty:easy",
+        "unanswerable"
+      ],
+      "checks": {
+        "mustInclude": [],
+        "mustNotInclude": []
+      },
+      "evidence": [],
+      "meta": {
+        "sources": []
+      }
+    }
+  ]
+}
